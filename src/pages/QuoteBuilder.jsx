@@ -31,8 +31,11 @@ import {
   Percent, 
   Package,
   DollarSign,
-  TrendingUp
+  TrendingUp,
+  ShoppingCart,
+  Trash2
 } from 'lucide-react';
+import { toast } from "sonner";
 import QuoteLineItemRow from '@/components/quotes/QuoteLineItemRow';
 import AddItemDialog from '@/components/quotes/AddItemDialog';
 
@@ -46,6 +49,7 @@ export default function QuoteBuilder() {
 
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -249,6 +253,103 @@ export default function QuoteBuilder() {
     navigate(createPageUrl('Quotes'));
   };
 
+  const handleDeleteQuote = async () => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este presupuesto? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Delete line items first (good practice to clean up)
+      const items = await base44.entities.QuoteLineItem.filter({ quote_id: quoteId });
+      // Process in chunks if too many, but usually ok for quotes
+      await Promise.all(items.map(item => base44.entities.QuoteLineItem.delete(item.id)));
+      
+      // Delete quote
+      await base44.entities.Quote.delete(quoteId);
+      
+      toast.success('Presupuesto eliminado');
+      navigate(createPageUrl('Quotes'));
+    } catch (error) {
+      console.error('Error deleting quote:', error);
+      toast.error('Error al eliminar el presupuesto');
+      setSaving(false);
+    }
+  };
+
+  const handleExportToCart = async () => {
+    const itemsToExport = lineItems.filter(item => !item.isDeleted);
+    
+    if (itemsToExport.length === 0) {
+      toast.error('No hay ítems para exportar');
+      return;
+    }
+
+    setExporting(true);
+    try {
+      // 1. Ensure Cart exists
+      let cartId;
+      const carts = await base44.entities.Cart.filter({ vendor_id: user.id });
+      
+      if (carts.length > 0) {
+        cartId = carts[0].id;
+      } else {
+        const newCart = await base44.entities.Cart.create({
+            vendor_id: user.id,
+            global_margin_percent: 20
+        });
+        cartId = newCart.id;
+      }
+
+      // 2. Process items
+      for (const item of itemsToExport) {
+        // Check if item already exists in cart
+        const existingItems = await base44.entities.CartItem.filter({
+          vendor_id: user.id,
+          product_id: item.product_id
+        });
+
+        if (existingItems.length > 0) {
+          // Update quantity (add to existing)
+          const existingItem = existingItems[0];
+          await base44.entities.CartItem.update(existingItem.id, {
+            quantity: existingItem.quantity + (parseFloat(item.quantity) || 1)
+          });
+        } else {
+          // Find product image from the products list we already fetched
+          const productInfo = products.find(p => p.id === item.product_id);
+
+          // Create new cart item
+          await base44.entities.CartItem.create({
+            cart_id: cartId,
+            vendor_id: user.id,
+            supplier_id: item.supplier_id,
+            supplier_name: item.supplier_name,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            product_description: item.product_description_snapshot || '',
+            product_image_url: productInfo?.image_url || '',
+            unit_of_measure: item.unit_of_measure || 'unit',
+            quantity: parseFloat(item.quantity) || 1,
+            unit_cost_price: parseFloat(item.unit_cost_price) || 0,
+            margin_percent: item.margin_percent !== null && item.margin_percent !== '' 
+              ? parseFloat(item.margin_percent) 
+              : null
+          });
+        }
+      }
+
+      toast.success('Productos exportados al carrito correctamente');
+      queryClient.invalidateQueries({ queryKey: ['cartItems'] });
+      navigate(createPageUrl('VendorCart'));
+
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.error('Error al exportar al carrito');
+    }
+    setExporting(false);
+  };
+
   const visibleItems = lineItems.filter(item => !item.isDeleted);
   const isLoading = quoteLoading || itemsLoading;
 
@@ -276,18 +377,44 @@ export default function QuoteBuilder() {
             {quoteData.quote_number || 'Crear un nuevo presupuesto'}
           </p>
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-[#E53935] hover:bg-[#C62828]"
-        >
-          {saving ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Save className="w-4 h-4 mr-2" />
+        <div className="flex gap-2">
+          {quoteId && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleDeleteQuote}
+              disabled={saving}
+              className="border-[#2A2A2A] text-red-400 hover:bg-red-900/20 hover:text-red-400"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           )}
-          Guardar presupuesto
-        </Button>
+          <Button
+            onClick={handleExportToCart}
+            disabled={exporting || visibleItems.length === 0}
+            variant="outline"
+            className="border-[#2A2A2A] text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]"
+          >
+            {exporting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <ShoppingCart className="w-4 h-4 mr-2" />
+            )}
+            Exportar al carrito
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-[#E53935] hover:bg-[#C62828]"
+          >
+            {saving ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-2" />
+            )}
+            Guardar presupuesto
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

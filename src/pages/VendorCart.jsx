@@ -16,7 +16,8 @@ import {
   TrendingUp,
   Percent,
   DollarSign,
-  ArrowRight
+  ArrowRight,
+  MessageCircle
 } from 'lucide-react';
 
 export default function VendorCart() {
@@ -32,6 +33,11 @@ export default function VendorCart() {
     queryKey: ['cartItems', user?.id],
     queryFn: () => base44.entities.CartItem.filter({ vendor_id: user.id }),
     enabled: !!user?.id
+  });
+
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['suppliers'],
+    queryFn: () => base44.entities.Supplier.filter({ active: true })
   });
 
   const updateItemMutation = useMutation({
@@ -98,6 +104,35 @@ export default function VendorCart() {
       totalProfit: subtotalSale - subtotalCost
     };
   }, [cartItems, globalMargin]);
+
+  const ordersBySupplier = useMemo(() => {
+    const grouped = {};
+    cartItems.forEach(item => {
+      if (!grouped[item.supplier_id]) {
+        const supplier = suppliers.find(s => s.id === item.supplier_id);
+        grouped[item.supplier_id] = {
+          supplierName: item.supplier_name,
+          supplierPhone: supplier?.phone || '',
+          items: []
+        };
+      }
+      grouped[item.supplier_id].items.push(item);
+    });
+    return grouped;
+  }, [cartItems, suppliers]);
+
+  const getWhatsAppLink = (phone, items) => {
+    if (!phone) return null;
+    // Remove non-numeric chars
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    let message = `Hola, me gustaría ordenar los siguientes productos:\n\n`;
+    items.forEach(item => {
+      message += `- ${item.quantity} ${item.unit_of_measure} x ${item.product_name}\n`;
+    });
+    
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+  };
 
   if (isLoading) {
     return (
@@ -319,6 +354,42 @@ export default function VendorCart() {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
+
+            {/* Contact Suppliers via WhatsApp */}
+            <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg text-[#F5F5F5] flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-emerald-500" />
+                  Contactar proveedores
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-2">
+                {Object.entries(ordersBySupplier).map(([supplierId, data]) => {
+                  const whatsappLink = getWhatsAppLink(data.supplierPhone, data.items);
+                  return (
+                    <div key={supplierId} className="flex items-center justify-between p-3 rounded-lg bg-[#2A2A2A]">
+                      <div>
+                        <p className="font-medium text-[#F5F5F5]">{data.supplierName}</p>
+                        <p className="text-xs text-[#B0B0B0]">{data.items.length} ítems</p>
+                      </div>
+                      {whatsappLink ? (
+                        <a 
+                          href={whatsappLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          WhatsApp
+                        </a>
+                      ) : (
+                        <span className="text-xs text-[#B0B0B0] italic">Sin teléfono</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
             </div>
           </div>
         </div>

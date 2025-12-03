@@ -27,7 +27,6 @@ export default function ProductDetail() {
   const queryClient = useQueryClient();
 
   const [quantity, setQuantity] = useState(1);
-  const [adding, setAdding] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -49,22 +48,55 @@ export default function ProductDetail() {
   });
 
   const addToCartMutation = useMutation({
-    mutationFn: async () => {
-      // Check if item already exists in cart
+    mutationFn: async ({ user, quantityToAdd }) => {
+      console.log("Starting add to cart mutation for user:", user.id, "Quantity:", quantityToAdd);
+      if (!user?.id) throw new Error("No se pudo identificar al usuario");
+
+      // 1. Ensure Cart exists
+      let cartId;
+      try {
+        // Force fetch list of carts
+        const carts = await base44.entities.Cart.filter({ vendor_id: user.id });
+        console.log("Found carts:", carts);
+        
+        if (carts && carts.length > 0) {
+          cartId = carts[0].id;
+        } else {
+          console.log("Creating new cart");
+          const newCart = await base44.entities.Cart.create({
+              vendor_id: user.id,
+              global_margin_percent: 20
+          });
+          cartId = newCart.id;
+        }
+      } catch (e) {
+        console.error("Error fetching/creating cart:", e);
+        throw new Error("Error al acceder al carrito: " + e.message);
+      }
+
+      // Check if item already exists in cart - Using same filter logic as VendorCart
       const existingItems = await base44.entities.CartItem.filter({
         vendor_id: user.id,
         product_id: product.id
       });
+      console.log("Existing items:", existingItems);
 
-      if (existingItems.length > 0) {
+      if (existingItems && existingItems.length > 0) {
         // Update quantity
         const existingItem = existingItems[0];
-        return base44.entities.CartItem.update(existingItem.id, {
-          quantity: existingItem.quantity + quantity
+        const currentQty = parseFloat(existingItem.quantity) || 0;
+        const addQty = parseFloat(quantityToAdd) || 1;
+        const newTotalQty = currentQty + addQty;
+        
+        console.log(`Updating item ${existingItem.id} to quantity ${newTotalQty}`);
+        return await base44.entities.CartItem.update(existingItem.id, {
+          quantity: newTotalQty
         });
       } else {
         // Create new cart item
-        return base44.entities.CartItem.create({
+        console.log("Creating new cart item");
+        return await base44.entities.CartItem.create({
+          cart_id: cartId,
           vendor_id: user.id,
           supplier_id: product.supplier_id,
           supplier_name: product.supplier_name,
@@ -73,26 +105,31 @@ export default function ProductDetail() {
           product_description: product.description || '',
           product_image_url: product.image_url || '',
           unit_of_measure: product.unit_of_measure || 'unit',
-          quantity: quantity,
-          unit_cost_price: product.base_price,
+          quantity: parseFloat(quantityToAdd) || 1,
+          unit_cost_price: parseFloat(product.base_price) || 0,
           margin_percent: null
         });
       }
     },
     onSuccess: () => {
+      console.log("Add to cart successful, invalidating queries");
+      // Invalidate both the general list and the specific user list to be safe
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
-      toast.success('Added to cart!');
+      toast.success('Producto agregado al carrito');
+    },
+    onError: (error) => {
+      console.error("Error adding to cart:", error);
+      toast.error(error.message || 'Error al agregar producto');
     }
   });
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (!user) {
       navigate(createPageUrl('RoleSelection'));
       return;
     }
-    setAdding(true);
-    await addToCartMutation.mutateAsync();
-    setAdding(false);
+    // Pass the current state values directly to the mutation function
+    addToCartMutation.mutate({ user, quantityToAdd: quantity });
   };
 
   if (isLoading) {
@@ -265,10 +302,10 @@ export default function ProductDetail() {
                   <Button
                     size="lg"
                     onClick={handleAddToCart}
-                    disabled={adding}
+                    disabled={addToCartMutation.isPending || addToCartMutation.isLoading}
                     className="bg-[#E53935] hover:bg-[#C62828] text-white"
                   >
-                    {adding ? (
+                    {(addToCartMutation.isPending || addToCartMutation.isLoading) ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
                       <ShoppingCart className="w-4 h-4 mr-2" />

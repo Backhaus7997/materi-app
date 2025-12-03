@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
+import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -42,11 +42,7 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.auth.me()
   });
 
-  const handleSwitchRole = async () => {
-    await base44.auth.updateMe({ user_role: null });
-    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-    navigate(createPageUrl('RoleSelection'));
-  };
+
 
   const { data: cartItems = [] } = useQuery({
     queryKey: ['cartItems', user?.id],
@@ -191,14 +187,7 @@ export default function Layout({ children, currentPageName }) {
             <p className="text-xs text-[#B0B0B0] font-medium truncate">{user?.email}</p>
             <p className="text-sm text-[#F5F5F5] mt-0.5">Panel de vendedor</p>
           </div>
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A]"
-            onClick={handleSwitchRole}
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Cambiar rol
-          </Button>
+
           <Button 
             variant="ghost" 
             className="w-full justify-start text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A]"

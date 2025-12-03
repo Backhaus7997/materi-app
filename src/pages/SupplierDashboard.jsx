@@ -161,11 +161,7 @@ export default function SupplierDashboard() {
     base44.auth.logout();
   };
 
-  const handleSwitchRole = async () => {
-    await base44.auth.updateMe({ user_role: null });
-    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-    navigate(createPageUrl('RoleSelection'));
-  };
+
 
   const filteredProducts = products.filter(p =>
     p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -199,10 +195,7 @@ export default function SupplierDashboard() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-[#B0B0B0] hidden sm:block">{user?.email}</span>
-              <Button variant="ghost" size="sm" className="text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A]" onClick={handleSwitchRole}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Cambiar rol
-              </Button>
+
               <Button variant="ghost" size="sm" className="text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A]" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Cerrar sesión
