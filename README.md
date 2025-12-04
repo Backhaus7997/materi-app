@@ -15,6 +15,10 @@ npm run dev
 
 ```bash
 npm run build
+
+localhost:4000
+npm run dev (frontend)
+npm start (backend)
 ```
 
 For more information and support, please contact Base44 support at app@base44.com.
