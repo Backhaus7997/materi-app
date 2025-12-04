@@ -1,0 +1,44 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  user_role    String    // 'Vendor' | 'Supplier' por ahora lo manejamos a mano
+
+  // Relación opcional con Supplier (un usuario puede estar ligado a un supplier)
+  supplier     Supplier? @relation(fields: [supplierId], references: [id])
+  supplierId   String?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Supplier {
+  id             String   @id @default(cuid())
+  name           String
+  company_name   String?
+  contact_person String?
+  email          String?
+  phone          String?
+  address        String?
+  notes          String?
+  payment_terms  String?
+  active         Boolean  @default(true)
+
+  // back relation: un supplier puede tener muchos usuarios (o uno solo, da igual por ahora)
+  users          User[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
