@@ -1,14 +1,15 @@
 // src/pages/Login.jsx
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
-export default function Login() {
+export default function LoginPage() {
   const [email, setEmail] = useState("proveedor1@example.com"); // podés dejar precargado para test
   const [password, setPassword] = useState("secreto123");
   const [error, setError] = useState("");
@@ -43,48 +44,64 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4">
+      <Card className="w-full max-w-md bg-[#1E1E1E] border-[#2A2A2A]">
         <CardHeader>
-          <CardTitle className="text-center text-xl">
+          <CardTitle className="text-center text-xl text-[#F5F5F5]">
             Iniciar sesión
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-[#F5F5F5]">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5]"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password" className="text-[#F5F5F5]">
+                Contraseña
+              </Label>
               <Input
                 id="password"
                 type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5]"
               />
             </div>
 
             {error && (
-              <p className="text-sm text-red-500 text-center">{error}</p>
+              <p className="text-sm text-red-400 text-center">{error}</p>
             )}
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-[#E53935] hover:bg-[#C62828] text-white"
               disabled={loginMutation.isLoading}
             >
+              {loginMutation.isLoading && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
               {loginMutation.isLoading ? "Ingresando..." : "Entrar"}
             </Button>
+
+            <p className="text-xs text-[#B0B0B0] text-center mt-2">
+              ¿No tenés cuenta?{" "}
+              <Link to="/register" className="text-[#E53935] hover:underline">
+                Crear cuenta
+              </Link>
+            </p>
           </form>
         </CardContent>
       </Card>

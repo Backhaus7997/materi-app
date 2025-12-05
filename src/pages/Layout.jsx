@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 import { base44 } from '@/api/base44Client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Building2, 
   Package, 
@@ -42,13 +41,29 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.auth.me()
   });
 
-
-
   const { data: cartItems = [] } = useQuery({
     queryKey: ['cartItems', user?.id],
     queryFn: () => base44.entities.CartItem.filter({ vendor_id: user.id }),
     enabled: !!user?.id && user?.user_role === 'Vendor'
   });
+
+  // 🔐 logout real: llama al backend, limpia cache y manda a /login
+  const logoutMutation = useMutation({
+    mutationFn: () => base44.auth.logout(),
+    onSuccess: async () => {
+      await queryClient.clear();
+      navigate('/login');
+    },
+    onError: async (err) => {
+      console.error('Error al cerrar sesión', err);
+      await queryClient.clear();
+      navigate('/login');
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   // Handle role-based redirects
   useEffect(() => {
@@ -69,10 +84,6 @@ export default function Layout({ children, currentPageName }) {
       return;
     }
   }, [user, userLoading, currentPageName, navigate]);
-
-  const handleLogout = () => {
-    base44.auth.logout();
-  };
 
   // Show no layout for certain pages
   if (noLayoutPages.includes(currentPageName)) {

@@ -9,7 +9,7 @@ async function request(path, { method = "GET", body, headers = {} } = {}) {
       "Content-Type": "application/json",
       ...headers,
     },
-    credentials: "include", // importante para que viaje la cookie del login
+    credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
   });
 
@@ -22,18 +22,16 @@ async function request(path, { method = "GET", body, headers = {} } = {}) {
   return res.json();
 }
 
-// ---------- SUPPLIERS: backend real ----------
+// ---------- SUPPLIERS (backend real) ----------
 
 const SupplierEntity = {
   async filter(query = {}) {
     const params = new URLSearchParams();
-
     Object.entries(query).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
         params.append(key, String(value));
       }
     });
-
     const qs = params.toString();
     return request(`/suppliers${qs ? `?${qs}` : ""}`);
   },
@@ -63,7 +61,118 @@ const SupplierEntity = {
   },
 };
 
-// ---------- Mocks para el resto de entidades por ahora ----------
+// ---------- PRODUCTS (backend real) ----------
+
+const ProductEntity = {
+  async filter(query = {}) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    const qs = params.toString();
+    return request(`/products${qs ? `?${qs}` : ""}`);
+  },
+
+  async get(id) {
+    return request(`/products/${id}`);
+  },
+
+  async create(data) {
+    return request(`/products`, {
+      method: "POST",
+      body: data,
+    });
+  },
+
+  async update(id, data) {
+    return request(`/products/${id}`, {
+      method: "PATCH",
+      body: data,
+    });
+  },
+
+  async delete(id) {
+    return request(`/products/${id}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// ---------- CARTS (backend real) ----------
+
+const CartEntity = {
+  async filter(query = {}) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    const qs = params.toString();
+    return request(`/carts${qs ? `?${qs}` : ""}`);
+  },
+
+  async get(id) {
+    return request(`/carts?id=${encodeURIComponent(id)}`);
+  },
+
+  async create(data) {
+    return request(`/carts`, {
+      method: "POST",
+      body: data,
+    });
+  },
+
+  async update(id, data) {
+    return request(`/carts/${id}`, {
+      method: "PATCH",
+      body: data,
+    });
+  },
+};
+
+// ---------- CART ITEMS (backend real) ----------
+
+const CartItemEntity = {
+  async filter(query = {}) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    const qs = params.toString();
+    return request(`/cart-items${qs ? `?${qs}` : ""}`);
+  },
+
+  async get(id) {
+    return request(`/cart-items/${id}`);
+  },
+
+  async create(data) {
+    return request(`/cart-items`, {
+      method: "POST",
+      body: data,
+    });
+  },
+
+  async update(id, data) {
+    return request(`/cart-items/${id}`, {
+      method: "PATCH",
+      body: data,
+    });
+  },
+
+  async delete(id) {
+    return request(`/cart-items/${id}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// ---------- Mocks para lo que todavía no migramos ----------
 
 let idCounter = 1;
 const genId = () => String(idCounter++);
@@ -98,19 +207,22 @@ function createMockEntity(name) {
   };
 }
 
+// ---------- EXPORT base44 compatible con el código existente ----------
+
 export const base44 = {
   entities: {
     Supplier: SupplierEntity,
+    Product: ProductEntity,
 
-    Product: createMockEntity("Product"),
+    Cart: CartEntity,
+    CartItem: CartItemEntity,
+
+    // Todavía mock: los vamos a migrar después
     Quote: createMockEntity("Quote"),
     QuoteLineItem: createMockEntity("QuoteLineItem"),
-    Cart: createMockEntity("Cart"),
-    CartItem: createMockEntity("CartItem"),
   },
 
   auth: {
-    // GET /auth/me → puede devolver 401 si no hay login
     async me() {
       try {
         const res = await fetch(`${API_URL}/auth/me`, {

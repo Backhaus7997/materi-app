@@ -123,6 +123,20 @@ export default function SupplierDashboard() {
     }
   });
 
+  // 🔐 logout real para proveedores
+  const logoutMutation = useMutation({
+    mutationFn: () => base44.auth.logout(),
+    onSuccess: async () => {
+      await queryClient.clear();
+      navigate('/login');
+    },
+    onError: async (err) => {
+      console.error('Error al cerrar sesión (supplier)', err);
+      await queryClient.clear();
+      navigate('/login');
+    },
+  });
+
   const handleSupplierSave = async (data) => {
     if (supplierData) {
       await updateSupplierMutation.mutateAsync({ id: supplierData.id, data });
@@ -135,7 +149,6 @@ export default function SupplierDashboard() {
     if (selectedProduct) {
       await updateProductMutation.mutateAsync({ id: selectedProduct.id, data });
     } else {
-      // Ensure supplier_id and supplier_name are set
       const productData = {
         ...data,
         supplier_id: user.supplier_id,
@@ -158,10 +171,8 @@ export default function SupplierDashboard() {
   };
 
   const handleLogout = () => {
-    base44.auth.logout();
+    logoutMutation.mutate();
   };
-
-
 
   const filteredProducts = products.filter(p =>
     p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -196,9 +207,15 @@ export default function SupplierDashboard() {
             <div className="flex items-center gap-4">
               <span className="text-sm text-[#B0B0B0] hidden sm:block">{user?.email}</span>
 
-              <Button variant="ghost" size="sm" className="text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A]" onClick={handleLogout}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A]"
+                onClick={handleLogout}
+                disabled={logoutMutation.isLoading}
+              >
                 <LogOut className="w-4 h-4 mr-2" />
-                Cerrar sesión
+                {logoutMutation.isLoading ? "Cerrando..." : "Cerrar sesión"}
               </Button>
             </div>
           </div>

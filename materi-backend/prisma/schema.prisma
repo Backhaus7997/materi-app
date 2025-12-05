@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,19 +12,24 @@ model User {
   name         String
   email        String    @unique
   passwordHash String
-  user_role    String    // 'Vendor' | 'Supplier' por ahora lo manejamos a mano
+  user_role    String    // 'Vendor' | 'Supplier'
 
-  // Relación opcional con Supplier (un usuario puede estar ligado a un supplier)
+  // relación opcional con Supplier (para proveedores)
   supplier     Supplier? @relation(fields: [supplierId], references: [id])
   supplierId   String?
+
+  // relación para vendedores
+  carts        Cart[]
+  cartItems    CartItem[]
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
 
 model Supplier {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   name           String
+
   company_name   String?
   contact_person String?
   email          String?
@@ -34,11 +37,202 @@ model Supplier {
   address        String?
   notes          String?
   payment_terms  String?
-  active         Boolean  @default(true)
+  active         Boolean   @default(true)
 
-  // back relation: un supplier puede tener muchos usuarios (o uno solo, da igual por ahora)
   users          User[]
+  products       Product[]
+  quoteLineItems QuoteLineItem[]
+  cartItems      CartItem[]
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model Product {
+  id              String    @id @default(cuid())
+
+  // Base44: supplier_id
+  supplier        Supplier  @relation(fields: [supplierId], references: [id])
+  supplierId      String
+
+  // Base44: supplier_name
+  supplier_name   String?
+
+  // Base44: name (required)
+  name            String
+
+  // Base44: internal_code
+  internal_code   String?
+
+  // Base44: description
+  description     String?
+
+  // Base44: image_url
+  image_url       String?
+
+  // Base44: category
+  category        String?
+
+  // Base44: unit_of_measure (default "unit")
+  unit_of_measure String    @default("unit")
+
+  // Base44: base_price (required)
+  base_price      Float
+
+  // Base44: currency (default "USD")
+  currency        String    @default("USD")
+
+  // Base44: active (default true)
+  active          Boolean   @default(true)
+
+  quoteLineItems  QuoteLineItem[]
+  cartItems       CartItem[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Quote {
+  id                    String   @id @default(cuid())
+
+  // Base44: quote_number
+  quote_number          String?
+
+  // Base44: customer_name (required)
+  customer_name         String
+
+  // Base44: customer_company
+  customer_company      String?
+
+  // Base44: customer_email
+  customer_email        String?
+
+  // Base44: customer_phone
+  customer_phone        String?
+
+  // Base44: status (default "Draft")
+  status                String   @default("Draft")
+
+  // Base44: global_margin_percent (default 20)
+  global_margin_percent Float    @default(20)
+
+  // Base44: total_cost (default 0)
+  total_cost            Float    @default(0)
+
+  // Base44: total_sale_price (default 0)
+  total_sale_price      Float    @default(0)
+
+  // Base44: total_profit_amount (default 0)
+  total_profit_amount   Float    @default(0)
+
+  // Base44: notes
+  notes                 String?
+
+  // relación con líneas
+  lineItems             QuoteLineItem[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model QuoteLineItem {
+  id        String   @id @default(cuid())
+
+  // Base44: quote_id (required)
+  quote     Quote    @relation(fields: [quoteId], references: [id])
+  quoteId   String
+
+  // Base44: supplier_id (opcional) + snapshot
+  supplier        Supplier? @relation(fields: [supplierId], references: [id])
+  supplierId      String?
+  supplier_name   String?   // snapshot
+
+  // Base44: product_id (required)
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  product_name                 String? // snapshot
+  product_description_snapshot String?
+
+  // Base44: unit_of_measure
+  unit_of_measure String?
+
+  // Base44: quantity (required, default 1)
+  quantity        Float   @default(1)
+
+  // Base44: unit_cost_price (required)
+  unit_cost_price Float
+
+  // Base44: line_cost_total
+  line_cost_total Float?  @default(0)
+
+  // Base44: margin_percent
+  margin_percent  Float?
+
+  // Base44: unit_sale_price
+  unit_sale_price Float?
+
+  // Base44: line_sale_total
+  line_sale_total Float?  @default(0)
+
+  // Base44: line_profit_amount
+  line_profit_amount Float? @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Cart {
+  id                    String   @id @default(cuid())
+
+  // Base44: vendor_id (required)
+  vendor                User     @relation(fields: [vendorId], references: [id])
+  vendorId              String
+
+  // Base44: global_margin_percent (default 20)
+  global_margin_percent Float    @default(20)
+
+  // relación con items
+  items                 CartItem[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+
+  // Base44: cart_id (required)
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  cartId    String
+
+  // Base44: vendor_id (snapshot opcional)
+  vendor    User?    @relation(fields: [vendorId], references: [id])
+  vendorId  String?
+
+  // Base44: supplier_id + snapshot
+  supplier      Supplier? @relation(fields: [supplierId], references: [id])
+  supplierId    String?
+  supplier_name String?
+
+  // Base44: product_id (required) + snapshots
+  product            Product @relation(fields: [productId], references: [id])
+  productId          String
+  product_name       String?
+  product_description String?
+  product_image_url  String?
+
+  // Base44: unit_of_measure
+  unit_of_measure String?
+
+  // Base44: quantity (required, default 1)
+  quantity        Float   @default(1)
+
+  // Base44: unit_cost_price (required)
+  unit_cost_price Float
+
+  // Base44: margin_percent
+  margin_percent  Float?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

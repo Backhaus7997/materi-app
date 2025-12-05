@@ -1,3 +1,6 @@
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+
 import Layout from "./Layout.jsx";
 
 import Quotes from "./Quotes";
@@ -9,24 +12,19 @@ import VendorSuppliers from "./VendorSuppliers";
 import VendorProducts from "./VendorProducts";
 import ProductDetail from "./ProductDetail";
 import VendorCart from "./VendorCart";
-
-// 👇 nueva import
-import Login from "./login";
-
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import LoginPage from "./login";      // página de login
+import RegisterPage from "./register"; // página de registro
 
 const PAGES = {
-  Quotes: Quotes,
-  QuoteBuilder: QuoteBuilder,
-  RoleSelection: RoleSelection,
-  SupplierDashboard: SupplierDashboard,
-  VendorDashboard: VendorDashboard,
-  VendorSuppliers: VendorSuppliers,
-  VendorProducts: VendorProducts,
-  ProductDetail: ProductDetail,
-  VendorCart: VendorCart,
-  // 👇 lo agregamos para que _getCurrentPage lo reconozca
-  Login: Login,
+  Quotes,
+  QuoteBuilder,
+  RoleSelection,
+  SupplierDashboard,
+  VendorDashboard,
+  VendorSuppliers,
+  VendorProducts,
+  ProductDetail,
+  VendorCart,
 };
 
 function _getCurrentPage(url) {
@@ -44,21 +42,27 @@ function _getCurrentPage(url) {
   return pageName || Object.keys(PAGES)[0];
 }
 
-// Create a wrapper component that uses useLocation inside the Router context
 function PagesContent() {
   const location = useLocation();
+  const path = location.pathname.toLowerCase();
+
+  // 👇 Auth sin Layout: "/" también muestra el login
+  if (path === "/" || path.startsWith("/login") || path.startsWith("/register")) {
+    return (
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Routes>
+    );
+  }
+
   const currentPage = _getCurrentPage(location.pathname);
 
   return (
     <Layout currentPageName={currentPage}>
       <Routes>
-        {/* home */}
-        <Route path="/" element={<Quotes />} />
-
-        {/* login */}
-        <Route path="/login" element={<Login />} />
-
-        {/* resto de las páginas */}
+        {/* Si alguien entra directo a /Quotes, etc, sigue funcionando */}
         <Route path="/Quotes" element={<Quotes />} />
         <Route path="/QuoteBuilder" element={<QuoteBuilder />} />
         <Route path="/RoleSelection" element={<RoleSelection />} />
