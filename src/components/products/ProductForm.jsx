@@ -18,10 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Package, Upload } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 
 const UNITS = ['unit', 'box', 'm²', 'm³', 'kg', 'liter', 'meter', 'pack'];
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'MXN', 'BRL'];
+const CURRENCIES = ['ARS', 'USD', 'EUR', 'GBP', 'MXN', 'BRL'];
 
 export default function ProductForm({ open, onOpenChange, product, suppliers, onSave, hideSupplierSelect = false }) {
   const [formData, setFormData] = useState({
@@ -71,7 +70,7 @@ export default function ProductForm({ open, onOpenChange, product, suppliers, on
         category: '',
         unit_of_measure: 'unit',
         base_price: '',
-        currency: 'USD',
+        currency: 'ARS',
         active: true
       });
     }
@@ -88,14 +87,37 @@ export default function ProductForm({ open, onOpenChange, product, suppliers, on
   };
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setFormData({ ...formData, image_url: file_url });
+  setUploading(true);
+
+  try {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const dataUrl = reader.result; // data:image/png;base64,...
+      setFormData((prev) => ({
+        ...prev,
+        image_url: dataUrl,
+      }));
+      setUploading(false);
+    };
+
+    reader.onerror = (err) => {
+      console.error('Error leyendo la imagen', err);
+      setError('No se pudo procesar la imagen. Probá con otro archivo.');
+      setUploading(false);
+    };
+
+    reader.readAsDataURL(file);
+  } catch (err) {
+    console.error('Error manejando la imagen', err);
+    setError('Ocurrió un error al subir la imagen.');
     setUploading(false);
-  };
+  }
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

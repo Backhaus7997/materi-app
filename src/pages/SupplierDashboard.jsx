@@ -386,9 +386,14 @@ export default function SupplierDashboard() {
                               ) : '—'}
                             </TableCell>
                             <TableCell className="text-right">
-                              <span className="font-semibold text-[#F5F5F5]">${product.base_price?.toFixed(2)}</span>
-                              <span className="text-xs text-[#B0B0B0] ml-1">/{product.unit_of_measure}</span>
+                              <span className="font-semibold text-[#F5F5F5]">
+                                {product.base_price?.toFixed(2)} {product.currency || 'USD'}
+                              </span>
+                              <span className="text-xs text-[#B0B0B0] ml-1">
+                                /{product.unit_of_measure}
+                              </span>
                             </TableCell>
+
                             <TableCell>
                               <Badge className={product.active !== false
                                 ? 'bg-emerald-900/30 text-emerald-400'

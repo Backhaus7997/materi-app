@@ -164,7 +164,7 @@ export default function VendorProducts() {
                     )}
                     <div className="mt-3 flex items-baseline gap-2">
                       <span className="text-xl font-bold text-[#E53935]">
-                        ${product.base_price?.toFixed(2)}
+                        {product.base_price?.toFixed(2)} {product.currency || 'USD'}
                       </span>
                       <span className="text-sm text-[#B0B0B0]">
                         / {product.unit_of_measure || 'unit'}
@@ -213,7 +213,7 @@ export default function VendorProducts() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xl font-bold text-[#E53935]">
-                        ${product.base_price?.toFixed(2)}
+                        {product.base_price?.toFixed(2)} {product.currency || 'USD'}
                       </p>
                       <p className="text-sm text-[#B0B0B0]">
                         per {product.unit_of_measure || 'unit'}

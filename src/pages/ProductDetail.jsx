@@ -205,12 +205,13 @@ export default function ProductDetail() {
 
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-bold text-[#E53935]">
-              ${product.base_price?.toFixed(2)}
+              {product.base_price?.toFixed(2)} {product.currency || 'USD'}
             </span>
             <span className="text-lg text-[#B0B0B0]">
               per {product.unit_of_measure || 'unit'}
             </span>
           </div>
+
 
           {product.description && (
             <div>
@@ -296,9 +297,10 @@ export default function ProductDetail() {
                   <div>
                     <p className="text-sm text-[#B0B0B0]">Subtotal</p>
                     <p className="text-2xl font-bold text-[#F5F5F5]">
-                      ${(product.base_price * quantity).toFixed(2)}
+                      {(((product.base_price ?? 0) * quantity).toFixed(2))} {product.currency || 'USD'}
                     </p>
                   </div>
+
                   <Button
                     size="lg"
                     onClick={handleAddToCart}
