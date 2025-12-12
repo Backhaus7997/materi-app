@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from "@/api/apiClient";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -30,12 +30,12 @@ export default function ProductDetail() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me()
+    queryFn: () => api.auth.me()
   });
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['product', productId],
-    queryFn: () => base44.entities.Product.filter({ id: productId }),
+    queryFn: () => api.entities.Product.filter({ id: productId }),
     enabled: !!productId
   });
 
@@ -43,7 +43,7 @@ export default function ProductDetail() {
 
   const { data: supplier } = useQuery({
     queryKey: ['supplier', product?.supplier_id],
-    queryFn: () => base44.entities.Supplier.filter({ id: product.supplier_id }),
+    queryFn: () => api.entities.Supplier.filter({ id: product.supplier_id }),
     enabled: !!product?.supplier_id
   });
 
@@ -56,14 +56,14 @@ export default function ProductDetail() {
       let cartId;
       try {
         // Force fetch list of carts
-        const carts = await base44.entities.Cart.filter({ vendor_id: user.id });
+        const carts = await api.entities.Cart.filter({ vendor_id: user.id });
         console.log("Found carts:", carts);
         
         if (carts && carts.length > 0) {
           cartId = carts[0].id;
         } else {
           console.log("Creating new cart");
-          const newCart = await base44.entities.Cart.create({
+          const newCart = await api.entities.Cart.create({
               vendor_id: user.id,
               global_margin_percent: 20
           });
@@ -75,7 +75,7 @@ export default function ProductDetail() {
       }
 
       // Check if item already exists in cart - Using same filter logic as VendorCart
-      const existingItems = await base44.entities.CartItem.filter({
+      const existingItems = await api.entities.CartItem.filter({
         vendor_id: user.id,
         product_id: product.id
       });
@@ -89,13 +89,13 @@ export default function ProductDetail() {
         const newTotalQty = currentQty + addQty;
         
         console.log(`Updating item ${existingItem.id} to quantity ${newTotalQty}`);
-        return await base44.entities.CartItem.update(existingItem.id, {
+        return await api.entities.CartItem.update(existingItem.id, {
           quantity: newTotalQty
         });
       } else {
         // Create new cart item
         console.log("Creating new cart item");
-        return await base44.entities.CartItem.create({
+        return await api.entities.CartItem.create({
           cart_id: cartId,
           vendor_id: user.id,
           supplier_id: product.supplier_id,

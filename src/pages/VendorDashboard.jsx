@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from "@/api/apiClient";
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -21,7 +21,7 @@ export default function VendorDashboard() {
 
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me()
+    queryFn: () => api.auth.me()
   });
 
   // Redirect if not a vendor
@@ -35,24 +35,26 @@ export default function VendorDashboard() {
 
   const { data: suppliers = [] } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.filter({ active: true })
+    queryFn: () => api.entities.Supplier.filter({ active: true })
   });
 
   const { data: products = [] } = useQuery({
     queryKey: ['allProducts'],
-    queryFn: () => base44.entities.Product.filter({ active: true })
+    queryFn: () => api.entities.Product.filter({ active: true })
   });
 
   const { data: cartItems = [] } = useQuery({
     queryKey: ['cartItems', user?.id],
-    queryFn: () => base44.entities.CartItem.filter({ vendor_id: user.id }),
+    queryFn: () => api.entities.CartItem.filter({ vendor_id: user.id }),
     enabled: !!user?.id
   });
 
-  const { data: quotes = [] } = useQuery({
-    queryKey: ['quotes'],
-    queryFn: () => base44.entities.Quote.list('-created_date', 5)
+  const { data: quotes = [], isLoading: quotesLoading, error: quotesError } = useQuery({
+    queryKey: ['quotes', user?.id],
+    enabled: !!user?.id,
+    queryFn: () => api.entities.Quote.filter({ vendor_id: user.id }),
   });
+
 
   if (userLoading) {
     return (

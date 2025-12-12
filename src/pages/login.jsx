@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -10,16 +10,18 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("proveedor1@example.com"); // podés dejar precargado para test
-  const [password, setPassword] = useState("secreto123");
+  // 👇 ahora empiezan vacíos
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }) => {
       setError("");
-      return base44.auth.login({ email, password });
+      return api.auth.login({ email, password });
     },
     onSuccess: async (user) => {
       // refrescar el currentUser en React Query
@@ -64,6 +66,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5]"
+                placeholder="tu@email.com"
               />
             </div>
 
@@ -78,6 +81,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5]"
+                placeholder="••••••••"
               />
             </div>
 

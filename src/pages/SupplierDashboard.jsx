@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from "@/api/apiClient";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -39,6 +39,45 @@ import {
 import SupplierForm from '@/components/suppliers/SupplierForm';
 import ProductForm from '@/components/products/ProductForm';
 
+// ----------------- VALIDACIONES (SUPPLIER) -----------------
+
+const isValidEmail = (email) => {
+  if (!email) return true; // opcional
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+};
+
+const isValidPhone = (phone) => {
+  if (!phone) return true; // opcional
+  const digits = String(phone).replace(/\D/g, "");
+  return digits.length >= 8 && digits.length <= 15;
+};
+
+const normalizePhone = (phone) => {
+  if (!phone) return "";
+  return String(phone).replace(/[^0-9+\-\s()]/g, ""); // deja números, +, -, espacios, ()
+};
+
+const validateSupplierBeforeSave = (data) => {
+  const errors = [];
+
+  if (!data?.name?.trim()) errors.push("• El nombre del proveedor es requerido.");
+
+  if (data?.email && !isValidEmail(data.email)) {
+    errors.push("• Email inválido. Ej: proveedor@empresa.com");
+  }
+
+  if (data?.phone && !isValidPhone(data.phone)) {
+    errors.push("• Teléfono inválido. Ej: +54 11 2345-6789");
+  }
+
+  if (errors.length) {
+    alert("No se puede guardar el proveedor:\n\n" + errors.join("\n"));
+    return false;
+  }
+
+  return true;
+};
+
 export default function SupplierDashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -49,7 +88,7 @@ export default function SupplierDashboard() {
 
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me()
+    queryFn: () => api.auth.me()
   });
 
   // Redirect if not a supplier
@@ -65,7 +104,7 @@ export default function SupplierDashboard() {
     queryKey: ['mySupplier', user?.supplier_id],
     queryFn: async () => {
       if (!user?.supplier_id) return null;
-      const results = await base44.entities.Supplier.filter({ id: user.supplier_id });
+      const results = await api.entities.Supplier.filter({ id: user.supplier_id });
       return results[0] || null;
     },
     enabled: !!user?.supplier_id
@@ -73,14 +112,14 @@ export default function SupplierDashboard() {
 
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['supplierProducts', user?.supplier_id],
-    queryFn: () => base44.entities.Product.filter({ supplier_id: user.supplier_id }, '-created_date'),
+    queryFn: () => api.entities.Product.filter({ supplier_id: user.supplier_id }, '-created_date'),
     enabled: !!user?.supplier_id
   });
 
   const createSupplierMutation = useMutation({
     mutationFn: async (data) => {
-      const supplier = await base44.entities.Supplier.create(data);
-      await base44.auth.updateMe({ supplier_id: supplier.id });
+      const supplier = await api.entities.Supplier.create(data);
+      await api.auth.updateMe({ supplier_id: supplier.id });
       return supplier;
     },
     onSuccess: () => {
@@ -91,7 +130,7 @@ export default function SupplierDashboard() {
   });
 
   const updateSupplierMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Supplier.update(id, data),
+    mutationFn: ({ id, data }) => api.entities.Supplier.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mySupplier'] });
       setSupplierFormOpen(false);
@@ -99,7 +138,7 @@ export default function SupplierDashboard() {
   });
 
   const createProductMutation = useMutation({
-    mutationFn: (data) => base44.entities.Product.create({
+    mutationFn: (data) => api.entities.Product.create({
       ...data,
       supplier_id: user.supplier_id,
       supplier_name: supplierData?.name || ''
@@ -115,7 +154,7 @@ export default function SupplierDashboard() {
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Product.update(id, data),
+    mutationFn: ({ id, data }) => api.entities.Product.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['supplierProducts'] });
       setProductFormOpen(false);
@@ -125,7 +164,7 @@ export default function SupplierDashboard() {
 
   // 🔐 logout real para proveedores
   const logoutMutation = useMutation({
-    mutationFn: () => base44.auth.logout(),
+    mutationFn: () => api.auth.logout(),
     onSuccess: async () => {
       await queryClient.clear();
       navigate('/login');
@@ -138,12 +177,21 @@ export default function SupplierDashboard() {
   });
 
   const handleSupplierSave = async (data) => {
+    if (!validateSupplierBeforeSave(data)) return;
+
+    const payload = {
+      ...data,
+      email: data?.email?.trim() || null,
+      phone: normalizePhone(data?.phone),
+    };
+
     if (supplierData) {
-      await updateSupplierMutation.mutateAsync({ id: supplierData.id, data });
+      await updateSupplierMutation.mutateAsync({ id: supplierData.id, data: payload });
     } else {
-      await createSupplierMutation.mutateAsync(data);
+      await createSupplierMutation.mutateAsync(payload);
     }
   };
+
 
   const handleProductSave = async (data) => {
     if (selectedProduct) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from "@/api/apiClient";
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ export default function RoleSelection() {
 
   const selectRole = async (role) => {
     setSaving(true);
-    await base44.auth.updateMe({ user_role: role });
+    await api.auth.updateMe({ user_role: role });
     
     if (role === 'Supplier') {
       navigate(createPageUrl('SupplierDashboard'));

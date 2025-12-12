@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/apiClient';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -31,12 +31,12 @@ export default function VendorSuppliers() {
 
   const { data: suppliers = [], isLoading: suppliersLoading } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.filter({ active: true })
+    queryFn: () => api.entities.Supplier.filter({ active: true })
   });
 
   const { data: allProducts = [] } = useQuery({
     queryKey: ['allProducts'],
-    queryFn: () => base44.entities.Product.filter({ active: true })
+    queryFn: () => api.entities.Product.filter({ active: true })
   });
 
   const filteredSuppliers = useMemo(() => {
@@ -46,15 +46,18 @@ export default function VendorSuppliers() {
     );
   }, [suppliers, searchTerm]);
 
+  // 🔴 ANTES: p.supplier_id
+  // 🟢 AHORA: p.supplierId (como lo devuelve el backend / Prisma)
   const supplierProducts = useMemo(() => {
     if (!selectedSupplier) return [];
-    return allProducts.filter(p => p.supplier_id === selectedSupplier.id);
+    return allProducts.filter(p => p.supplierId === selectedSupplier.id);
   }, [allProducts, selectedSupplier]);
 
   const productCounts = useMemo(() => {
     const counts = {};
     allProducts.forEach(p => {
-      counts[p.supplier_id] = (counts[p.supplier_id] || 0) + 1;
+      if (!p.supplierId) return;
+      counts[p.supplierId] = (counts[p.supplierId] || 0) + 1;
     });
     return counts;
   }, [allProducts]);

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from "@/api/apiClient";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -26,29 +26,29 @@ export default function VendorCart() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me()
+    queryFn: () => api.auth.me()
   });
 
   const { data: cartItems = [], isLoading } = useQuery({
     queryKey: ['cartItems', user?.id],
-    queryFn: () => base44.entities.CartItem.filter({ vendor_id: user.id }),
+    queryFn: () => api.entities.CartItem.filter({ vendor_id: user.id }),
     enabled: !!user?.id
   });
 
   const { data: suppliers = [] } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.filter({ active: true })
+    queryFn: () => api.entities.Supplier.filter({ active: true })
   });
 
   const updateItemMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.CartItem.update(id, data),
+    mutationFn: ({ id, data }) => api.entities.CartItem.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
     }
   });
 
   const deleteItemMutation = useMutation({
-    mutationFn: (id) => base44.entities.CartItem.delete(id),
+    mutationFn: (id) => api.entities.CartItem.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
     }
@@ -107,17 +107,23 @@ export default function VendorCart() {
 
   const ordersBySupplier = useMemo(() => {
     const grouped = {};
-    cartItems.forEach(item => {
-      if (!grouped[item.supplier_id]) {
-        const supplier = suppliers.find(s => s.id === item.supplier_id);
-        grouped[item.supplier_id] = {
-          supplierName: item.supplier_name,
+
+    cartItems.forEach((item) => {
+      const sid = item.supplier_id ?? item.supplierId;
+      if (!sid) return;
+
+      if (!grouped[sid]) {
+        const supplier = suppliers.find((s) => s.id === sid);
+        grouped[sid] = {
+          supplierName: item.supplier_name ?? item.supplierName ?? supplier?.name ?? 'Proveedor',
           supplierPhone: supplier?.phone || '',
-          items: []
+          items: [],
         };
       }
-      grouped[item.supplier_id].items.push(item);
+
+      grouped[sid].items.push(item);
     });
+
     return grouped;
   }, [cartItems, suppliers]);
 

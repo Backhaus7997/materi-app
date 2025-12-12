@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from "@/api/apiClient";
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -31,12 +31,12 @@ export default function VendorProducts() {
 
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['allProducts'],
-    queryFn: () => base44.entities.Product.filter({ active: true })
+    queryFn: () => api.entities.Product.filter({ active: true })
   });
 
   const { data: suppliers = [] } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.filter({ active: true })
+    queryFn: () => api.entities.Supplier.filter({ active: true })
   });
 
   const categories = useMemo(() => {
@@ -49,7 +49,7 @@ export default function VendorProducts() {
       const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.internal_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSupplier = supplierFilter === 'all' || p.supplier_id === supplierFilter;
+      const matchesSupplier = supplierFilter === 'all' || p.supplierId === supplierFilter;
       const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
       return matchesSearch && matchesSupplier && matchesCategory;
     });

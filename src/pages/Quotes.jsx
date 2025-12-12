@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { api } from "@/api/apiClient";
 import { useQuery } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileText, Plus, Search, Loader2, ChevronRight, TrendingUp } from 'lucide-react';
+import {
+  FileText,
+  Plus,
+  Search,
+  Loader2,
+  ChevronRight,
+  TrendingUp
+} from 'lucide-react';
 import { format } from 'date-fns';
 
 const STATUS_COLORS = {
@@ -36,46 +43,66 @@ export default function Quotes() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // usuario actual
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me()
+    queryFn: () => api.auth.me()
   });
 
-  // Redirect suppliers away
+  // si es proveedor, lo saco
   useEffect(() => {
     if (user?.user_role === 'Supplier') {
       navigate(createPageUrl('SupplierDashboard'));
     }
   }, [user, navigate]);
 
+  // presupuestos SOLO del vendedor actual
   const { data: quotes = [], isLoading } = useQuery({
-    queryKey: ['quotes'],
-    queryFn: () => base44.entities.Quote.list('-created_date')
+    queryKey: ['quotes', user?.id],
+    enabled: !!user?.id,
+    queryFn: () =>
+      api.entities.Quote.filter({
+        vendor_id: user.id,
+        // si tu backend soporta orden, podrías pasar algo así:
+        // order_by: '-createdAt'
+      }),
   });
 
+  // filtro por búsqueda + estado
   const filteredQuotes = useMemo(() => {
-    return quotes.filter(q => {
-      const matchesSearch = q.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        q.quote_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        q.customer_company?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || q.status === statusFilter;
+    return quotes.filter((q) => {
+      const term = searchTerm.toLowerCase();
+      const matchesSearch =
+        q.customer_name?.toLowerCase().includes(term) ||
+        q.quote_number?.toLowerCase().includes(term) ||
+        q.customer_company?.toLowerCase().includes(term);
+
+      const matchesStatus =
+        statusFilter === 'all' || q.status === statusFilter;
+
       return matchesSearch && matchesStatus;
     });
   }, [quotes, searchTerm, statusFilter]);
 
+  // stats (sobre los que ve este vendedor)
   const stats = useMemo(() => {
-    const total = quotes.length;
-    const accepted = quotes.filter(q => q.status === 'Accepted').length;
-    const totalProfit = quotes.reduce((sum, q) => sum + (q.total_profit_amount || 0), 0);
+    const total = filteredQuotes.length;
+    const accepted = filteredQuotes.filter(q => q.status === 'Accepted').length;
+    const totalProfit = filteredQuotes.reduce(
+      (sum, q) => sum + (q.total_profit_amount || 0),
+      0
+    );
     return { total, accepted, totalProfit };
-  }, [quotes]);
+  }, [filteredQuotes]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#F5F5F5]">Presupuestos</h1>
-          <p className="text-[#B0B0B0] mt-1">Crea y gestiona presupuestos para clientes</p>
+          <p className="text-[#B0B0B0] mt-1">
+            Crea y gestiona presupuestos para clientes
+          </p>
         </div>
         <Link to={createPageUrl('QuoteBuilder')}>
           <Button className="bg-[#E53935] hover:bg-[#C62828] text-white">
@@ -93,7 +120,9 @@ export default function Quotes() {
         </div>
         <div className="bg-[#1E1E1E] rounded-xl p-5 border border-[#2A2A2A]">
           <p className="text-sm text-[#B0B0B0]">Aceptados</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.accepted}</p>
+          <p className="text-2xl font-bold text-emerald-400 mt-1">
+            {stats.accepted}
+          </p>
         </div>
         <div className="bg-[#1E1E1E] rounded-xl p-5 border border-[#2A2A2A]">
           <div className="flex items-center justify-between">
@@ -101,7 +130,10 @@ export default function Quotes() {
             <TrendingUp className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-2xl font-bold text-[#F5F5F5] mt-1">
-            ${stats.totalProfit.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            $
+            {stats.totalProfit.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+            })}
           </p>
         </div>
       </div>
@@ -121,11 +153,36 @@ export default function Quotes() {
             <SelectValue placeholder="Todos los estados" />
           </SelectTrigger>
           <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
-            <SelectItem value="all" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">Todos los estados</SelectItem>
-            <SelectItem value="Draft" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">Borrador</SelectItem>
-            <SelectItem value="Sent" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">Enviado</SelectItem>
-            <SelectItem value="Accepted" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">Aceptado</SelectItem>
-            <SelectItem value="Rejected" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">Rechazado</SelectItem>
+            <SelectItem
+              value="all"
+              className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
+            >
+              Todos los estados
+            </SelectItem>
+            <SelectItem
+              value="Draft"
+              className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
+            >
+              Borrador
+            </SelectItem>
+            <SelectItem
+              value="Sent"
+              className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
+            >
+              Enviado
+            </SelectItem>
+            <SelectItem
+              value="Accepted"
+              className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
+            >
+              Aceptado
+            </SelectItem>
+            <SelectItem
+              value="Rejected"
+              className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
+            >
+              Rechazado
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -138,8 +195,12 @@ export default function Quotes() {
         ) : filteredQuotes.length === 0 ? (
           <div className="text-center py-20">
             <FileText className="w-16 h-16 mx-auto mb-4 text-[#2A2A2A]" />
-            <p className="text-[#B0B0B0] text-lg">No se encontraron presupuestos</p>
-            <p className="text-[#666] text-sm mt-1">Crea tu primer presupuesto para comenzar</p>
+            <p className="text-[#B0B0B0] text-lg">
+              No se encontraron presupuestos
+            </p>
+            <p className="text-[#666] text-sm mt-1">
+              Crea tu primer presupuesto para comenzar
+            </p>
             <Link to={createPageUrl('QuoteBuilder')}>
               <Button className="mt-4 bg-[#E53935] hover:bg-[#C62828] text-white">
                 <Plus className="w-4 h-4 mr-2" />
@@ -152,19 +213,36 @@ export default function Quotes() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-[#2A2A2A] border-[#2A2A2A]">
-                  <TableHead className="font-semibold text-[#B0B0B0]">Presupuesto #</TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0]">Cliente</TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0] hidden md:table-cell">Fecha</TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0]">Estado</TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0] text-right hidden sm:table-cell">Costo</TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0] text-right hidden sm:table-cell">Venta</TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0] text-right">Ganancia</TableHead>
+                  <TableHead className="font-semibold text-[#B0B0B0]">
+                    Presupuesto #
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#B0B0B0]">
+                    Cliente
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#B0B0B0] hidden md:table-cell">
+                    Fecha
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#B0B0B0]">
+                    Estado
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#B0B0B0] text-right hidden sm:table-cell">
+                    Costo
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#B0B0B0] text-right hidden sm:table-cell">
+                    Venta
+                  </TableHead>
+                  <TableHead className="font-semibold text-[#B0B0B0] text-right">
+                    Ganancia
+                  </TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredQuotes.map((quote) => (
-                  <TableRow key={quote.id} className="hover:bg-[#2A2A2A]/50 border-[#2A2A2A]">
+                  <TableRow
+                    key={quote.id}
+                    className="hover:bg-[#2A2A2A]/50 border-[#2A2A2A]"
+                  >
                     <TableCell>
                       <span className="font-mono font-medium text-[#E53935]">
                         {quote.quote_number || `Q-${quote.id?.slice(-6)}`}
@@ -172,17 +250,27 @@ export default function Quotes() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium text-[#F5F5F5]">{quote.customer_name}</p>
+                        <p className="font-medium text-[#F5F5F5]">
+                          {quote.customer_name}
+                        </p>
                         {quote.customer_company && (
-                          <p className="text-xs text-[#B0B0B0]">{quote.customer_company}</p>
+                          <p className="text-xs text-[#B0B0B0]">
+                            {quote.customer_company}
+                          </p>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="text-[#B0B0B0] hidden md:table-cell">
-                      {quote.created_date ? format(new Date(quote.created_date), 'MMM d, yyyy') : '—'}
+                      {quote.created_date
+                        ? format(new Date(quote.created_date), 'MMM d, yyyy')
+                        : '—'}
                     </TableCell>
                     <TableCell>
-                      <Badge className={STATUS_COLORS[quote.status] || STATUS_COLORS.Draft}>
+                      <Badge
+                        className={
+                          STATUS_COLORS[quote.status] || STATUS_COLORS.Draft
+                        }
+                      >
                         {quote.status || 'Draft'}
                       </Badge>
                     </TableCell>
@@ -193,13 +281,25 @@ export default function Quotes() {
                       ${(quote.total_sale_price || 0).toFixed(2)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={`font-semibold ${(quote.total_profit_amount || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      <span
+                        className={`font-semibold ${
+                          (quote.total_profit_amount || 0) >= 0
+                            ? 'text-emerald-400'
+                            : 'text-red-400'
+                        }`}
+                      >
                         ${(quote.total_profit_amount || 0).toFixed(2)}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Link to={createPageUrl(`QuoteBuilder?id=${quote.id}`)}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]">
+                      <Link
+                        to={createPageUrl(`QuoteBuilder?id=${quote.id}`)}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]"
+                        >
                           <ChevronRight className="w-4 h-4" />
                         </Button>
                       </Link>

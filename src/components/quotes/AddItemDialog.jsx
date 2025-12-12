@@ -23,16 +23,16 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
   const [quantity, setQuantity] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const activeSuppliers = useMemo(() => 
-    suppliers.filter(s => s.active !== false),
+  const activeSuppliers = useMemo(
+    () => suppliers.filter(s => s.active !== false),
     [suppliers]
   );
 
   const filteredProducts = useMemo(() => {
     return products
       .filter(p => p.active !== false)
-      .filter(p => selectedSupplier === 'all' || p.supplier_id === selectedSupplier)
-      .filter(p => 
+      .filter(p => selectedSupplier === 'all' || p.supplierId === selectedSupplier)
+      .filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.internal_code && p.internal_code.toLowerCase().includes(searchTerm.toLowerCase()))
       );
@@ -40,10 +40,10 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
 
   const handleAdd = () => {
     if (!selectedProduct) return;
-    
+
     onAdd({
-      supplier_id: selectedProduct.supplier_id,
-      supplier_name: selectedProduct.supplier_name,
+      supplier_id: selectedProduct.supplierId || selectedProduct.supplier_id || '',
+      supplier_name: selectedProduct.supplier_name || '',
       product_id: selectedProduct.id,
       product_name: selectedProduct.name,
       product_description_snapshot: selectedProduct.description || '',
@@ -80,9 +80,18 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
                 <SelectValue placeholder="Todos los proveedores" />
               </SelectTrigger>
               <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
-                <SelectItem value="all" className="text-[#F5F5F5] focus:bg-[#2A2A2A]">Todos los proveedores</SelectItem>
+                <SelectItem
+                  value="all"
+                  className="text-[#F5F5F5] focus:bg-[#2A2A2A]"
+                >
+                  Todos los proveedores
+                </SelectItem>
                 {activeSuppliers.map((supplier) => (
-                  <SelectItem key={supplier.id} value={supplier.id} className="text-[#F5F5F5] focus:bg-[#2A2A2A]">
+                  <SelectItem
+                    key={supplier.id}
+                    value={supplier.id}
+                    className="text-[#F5F5F5] focus:bg-[#2A2A2A]"
+                  >
                     {supplier.name}
                   </SelectItem>
                 ))}
@@ -133,18 +142,26 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="font-medium text-[#F5F5F5]">{product.name}</p>
-                          <p className="text-sm text-[#B0B0B0]">{product.supplier_name}</p>
+                          <p className="font-medium text-[#F5F5F5]">
+                            {product.name}
+                          </p>
+                          <p className="text-sm text-[#B0B0B0]">
+                            {product.supplier_name}
+                          </p>
                         </div>
                         <div className="text-right shrink-0">
                           <p className="font-semibold text-[#E53935]">
                             ${product.base_price?.toFixed(2)} {product.currency}
                           </p>
-                          <p className="text-xs text-[#B0B0B0]">por {product.unit_of_measure}</p>
+                          <p className="text-xs text-[#B0B0B0]">
+                            por {product.unit_of_measure}
+                          </p>
                         </div>
                       </div>
                       {product.internal_code && (
-                        <p className="text-xs text-[#666] mt-1">SKU: {product.internal_code}</p>
+                        <p className="text-xs text-[#666] mt-1">
+                          SKU: {product.internal_code}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -157,9 +174,12 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
         {selectedProduct && (
           <div className="pt-4 border-t border-[#2A2A2A] mt-4 space-y-4">
             <div className="p-4 bg-[#E53935]/20 rounded-xl">
-              <p className="text-sm text-[#E53935] font-medium">Seleccionado: {selectedProduct.name}</p>
+              <p className="text-sm text-[#E53935] font-medium">
+                Seleccionado: {selectedProduct.name}
+              </p>
               <p className="text-xs text-[#E53935]/80 mt-1">
-                ${selectedProduct.base_price?.toFixed(2)} por {selectedProduct.unit_of_measure}
+                ${selectedProduct.base_price?.toFixed(2)} por{' '}
+                {selectedProduct.unit_of_measure}
               </p>
             </div>
             <div className="flex items-end gap-4">

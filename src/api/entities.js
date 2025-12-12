@@ -1,19 +1,19 @@
-import { base44 } from './base44Client';
+import { api } from './apiClient';
 
 
-export const Supplier = base44.entities.Supplier;
+export const Supplier = api.entities.Supplier;
 
-export const Product = base44.entities.Product;
+export const Product = api.entities.Product;
 
-export const Quote = base44.entities.Quote;
+export const Quote = api.entities.Quote;
 
-export const QuoteLineItem = base44.entities.QuoteLineItem;
+export const QuoteLineItem = api.entities.QuoteLineItem;
 
-export const Cart = base44.entities.Cart;
+export const Cart = api.entities.Cart;
 
-export const CartItem = base44.entities.CartItem;
+export const CartItem = api.entities.CartItem;
 
 
 
 // auth sdk:
-export const User = base44.auth;
+export const User = api.auth;

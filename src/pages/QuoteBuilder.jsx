@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from "@/api/apiClient";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
-
-// Role check will redirect suppliers away
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,15 +20,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { 
-  ArrowLeft, 
-  Plus, 
-  Save, 
-  Loader2, 
-  User, 
-  Percent, 
+import {
+  ArrowLeft,
+  Plus,
+  Save,
+  Loader2,
+  User,
+  Percent,
   Package,
-  DollarSign,
   TrendingUp,
   ShoppingCart,
   Trash2
@@ -40,6 +37,24 @@ import QuoteLineItemRow from '@/components/quotes/QuoteLineItemRow';
 import AddItemDialog from '@/components/quotes/AddItemDialog';
 
 const STATUSES = ['Draft', 'Sent', 'Accepted', 'Rejected'];
+
+// ----------------- VALIDACIONES -----------------
+
+const isValidEmail = (email) => {
+  if (!email) return true; // opcional
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+};
+
+const isValidPhone = (phone) => {
+  if (!phone) return true; // opcional
+  const digits = String(phone).replace(/\D/g, "");
+  return digits.length >= 8 && digits.length <= 15;
+};
+
+const normalizePhone = (phone) => {
+  if (!phone) return "";
+  return String(phone).replace(/[^0-9+\-\s()]/g, ""); // deja números, +, -, espacios, ()
+};
 
 export default function QuoteBuilder() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -53,10 +68,10 @@ export default function QuoteBuilder() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me()
+    queryFn: () => api.auth.me()
   });
 
-  // Redirect suppliers away
+  // Redirects away
   useEffect(() => {
     if (user?.user_role === 'Supplier') {
       navigate(createPageUrl('SupplierDashboard'));
@@ -73,28 +88,29 @@ export default function QuoteBuilder() {
     global_margin_percent: 20,
     notes: ''
   });
+
   const [lineItems, setLineItems] = useState([]);
 
   const { data: existingQuote, isLoading: quoteLoading } = useQuery({
     queryKey: ['quote', quoteId],
-    queryFn: () => base44.entities.Quote.filter({ id: quoteId }),
+    queryFn: () => api.entities.Quote.filter({ id: quoteId }),
     enabled: !!quoteId
   });
 
   const { data: existingLineItems = [], isLoading: itemsLoading } = useQuery({
     queryKey: ['quoteLineItems', quoteId],
-    queryFn: () => base44.entities.QuoteLineItem.filter({ quote_id: quoteId }),
+    queryFn: () => api.entities.QuoteLineItem.filter({ quote_id: quoteId }),
     enabled: !!quoteId
   });
 
   const { data: suppliers = [] } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.list()
+    queryFn: () => api.entities.Supplier.list()
   });
 
   const { data: products = [] } = useQuery({
     queryKey: ['products'],
-    queryFn: () => base44.entities.Product.list()
+    queryFn: () => api.entities.Product.filter({ active: true })
   });
 
   useEffect(() => {
@@ -139,9 +155,10 @@ export default function QuoteBuilder() {
     lineItems.forEach(item => {
       const unitCost = parseFloat(item.unit_cost_price) || 0;
       const qty = parseFloat(item.quantity) || 0;
-      const itemMargin = item.margin_percent !== null && item.margin_percent !== undefined && item.margin_percent !== ''
-        ? parseFloat(item.margin_percent)
-        : globalMargin;
+      const itemMargin =
+        item.margin_percent !== null && item.margin_percent !== undefined && item.margin_percent !== ''
+          ? parseFloat(item.margin_percent)
+          : globalMargin;
 
       const lineCost = unitCost * qty;
       const unitSale = unitCost * (1 + itemMargin / 100);
@@ -182,7 +199,7 @@ export default function QuoteBuilder() {
   const handleDeleteItem = (index) => {
     const item = lineItems[index];
     if (item.isExisting) {
-      setLineItems(lineItems.map((li, i) => 
+      setLineItems(lineItems.map((li, i) =>
         i === index ? { ...li, isDeleted: true } : li
       ));
     } else {
@@ -190,67 +207,112 @@ export default function QuoteBuilder() {
     }
   };
 
-  const handleSave = async () => {
-    if (!quoteData.customer_name) {
-      alert('Por favor ingresa un nombre de cliente');
-      return;
+  const validateBeforeSave = () => {
+    const errors = [];
+
+    // requerido
+    if (!quoteData.customer_name?.trim()) {
+      errors.push("• Nombre del cliente es requerido.");
     }
+
+    // email opcional pero si hay, válido
+    if (quoteData.customer_email && !isValidEmail(quoteData.customer_email)) {
+      errors.push("• Email inválido. Ej: juan@ejemplo.com");
+    }
+
+    // teléfono opcional pero si hay, válido
+    if (quoteData.customer_phone && !isValidPhone(quoteData.customer_phone)) {
+      errors.push("• Teléfono inválido. Ej: +54 11 2345-6789");
+    }
+
+    // usuario logueado
+    if (!user?.id) {
+      errors.push("• No hay usuario autenticado. Volvé a iniciar sesión.");
+    }
+
+    if (errors.length > 0) {
+      alert("No se puede guardar:\n\n" + errors.join("\n"));
+      return false;
+    }
+
+    return true;
+  };
+
+
+  const handleSave = async () => {
+    if (!validateBeforeSave()) return;
 
     setSaving(true);
 
-    const quotePayload = {
-      ...quoteData,
-      global_margin_percent: parseFloat(quoteData.global_margin_percent) || 0,
-      total_cost: totals.totalCost,
-      total_sale_price: totals.totalSale,
-      total_profit_amount: totals.totalProfit
-    };
-
-    let savedQuoteId = quoteId;
-
-    if (quoteId) {
-      await base44.entities.Quote.update(quoteId, quotePayload);
-    } else {
-      const created = await base44.entities.Quote.create(quotePayload);
-      savedQuoteId = created.id;
-    }
-
-    // Handle line items
-    for (const item of lineItems) {
-      const itemPayload = {
-        quote_id: savedQuoteId,
-        supplier_id: item.supplier_id,
-        supplier_name: item.supplier_name,
-        product_id: item.product_id,
-        product_name: item.product_name,
-        product_description_snapshot: item.product_description_snapshot,
-        unit_of_measure: item.unit_of_measure,
-        quantity: parseFloat(item.quantity) || 1,
-        unit_cost_price: parseFloat(item.unit_cost_price) || 0,
-        line_cost_total: parseFloat(item.line_cost_total) || 0,
-        margin_percent: item.margin_percent !== null && item.margin_percent !== '' 
-          ? parseFloat(item.margin_percent) 
-          : null,
-        unit_sale_price: parseFloat(item.unit_sale_price) || 0,
-        line_sale_total: parseFloat(item.line_sale_total) || 0,
-        line_profit_amount: parseFloat(item.line_profit_amount) || 0
+    try {
+      // Datos comunes del presupuesto
+      const basePayload = {
+        ...quoteData,
+        vendor_id: user.id,
+        global_margin_percent: parseFloat(quoteData.global_margin_percent) || 0,
+        total_cost: totals.totalCost,
+        total_sale_price: totals.totalSale,
+        total_profit_amount: totals.totalProfit,
+        // normalizamos un poco el teléfono para evitar caracteres raros
+        customer_phone: normalizePhone(quoteData.customer_phone),
+        customer_email: quoteData.customer_email?.trim() || '',
       };
 
-      if (item.isDeleted && item.id) {
-        await base44.entities.QuoteLineItem.delete(item.id);
-      } else if (item.isNew) {
-        await base44.entities.QuoteLineItem.create(itemPayload);
-      } else if (item.isModified && item.id) {
-        await base44.entities.QuoteLineItem.update(item.id, itemPayload);
+      let savedQuoteId = quoteId;
+
+      // → si es edición
+      if (quoteId) {
+        await api.entities.Quote.update(quoteId, basePayload);
+      } else {
+        // → si es nuevo
+        const created = await api.entities.Quote.create(basePayload);
+        savedQuoteId = created.id;
       }
+
+      // ---------- Line items ----------
+      for (const item of lineItems) {
+        const itemPayload = {
+          quote_id: savedQuoteId,
+          supplier_id: item.supplier_id,
+          supplier_name: item.supplier_name,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_description_snapshot: item.product_description_snapshot,
+          unit_of_measure: item.unit_of_measure,
+          quantity: parseFloat(item.quantity) || 1,
+          unit_cost_price: parseFloat(item.unit_cost_price) || 0,
+          line_cost_total: parseFloat(item.line_cost_total) || 0,
+          margin_percent:
+            item.margin_percent !== null && item.margin_percent !== ''
+              ? parseFloat(item.margin_percent)
+              : null,
+          unit_sale_price: parseFloat(item.unit_sale_price) || 0,
+          line_sale_total: parseFloat(item.line_sale_total) || 0,
+          line_profit_amount: parseFloat(item.line_profit_amount) || 0,
+        };
+
+        if (item.isDeleted && item.id) {
+          await api.entities.QuoteLineItem.delete(item.id);
+        } else if (item.isNew) {
+          await api.entities.QuoteLineItem.create(itemPayload);
+        } else if (item.isModified && item.id) {
+          await api.entities.QuoteLineItem.update(item.id, itemPayload);
+        }
+      }
+
+      // Refrescar caches
+      queryClient.invalidateQueries({ queryKey: ['quotes'] });
+      queryClient.invalidateQueries({ queryKey: ['quote', savedQuoteId] });
+      queryClient.invalidateQueries({ queryKey: ['quoteLineItems', savedQuoteId] });
+
+      toast.success("Presupuesto guardado ✅");
+      navigate(createPageUrl('Quotes'));
+    } catch (err) {
+      console.error("Error guardando presupuesto:", err);
+      toast.error("Error al guardar el presupuesto");
+    } finally {
+      setSaving(false);
     }
-
-    queryClient.invalidateQueries({ queryKey: ['quotes'] });
-    queryClient.invalidateQueries({ queryKey: ['quote', savedQuoteId] });
-    queryClient.invalidateQueries({ queryKey: ['quoteLineItems', savedQuoteId] });
-
-    setSaving(false);
-    navigate(createPageUrl('Quotes'));
   };
 
   const handleDeleteQuote = async () => {
@@ -260,14 +322,11 @@ export default function QuoteBuilder() {
 
     setSaving(true);
     try {
-      // Delete line items first (good practice to clean up)
-      const items = await base44.entities.QuoteLineItem.filter({ quote_id: quoteId });
-      // Process in chunks if too many, but usually ok for quotes
-      await Promise.all(items.map(item => base44.entities.QuoteLineItem.delete(item.id)));
-      
-      // Delete quote
-      await base44.entities.Quote.delete(quoteId);
-      
+      const items = await api.entities.QuoteLineItem.filter({ quote_id: quoteId });
+      await Promise.all(items.map(item => api.entities.QuoteLineItem.delete(item.id)));
+
+      await api.entities.Quote.delete(quoteId);
+
       toast.success('Presupuesto eliminado');
       navigate(createPageUrl('Quotes'));
     } catch (error) {
@@ -279,7 +338,7 @@ export default function QuoteBuilder() {
 
   const handleExportToCart = async () => {
     const itemsToExport = lineItems.filter(item => !item.isDeleted);
-    
+
     if (itemsToExport.length === 0) {
       toast.error('No hay ítems para exportar');
       return;
@@ -289,38 +348,34 @@ export default function QuoteBuilder() {
     try {
       // 1. Ensure Cart exists
       let cartId;
-      const carts = await base44.entities.Cart.filter({ vendor_id: user.id });
-      
+      const carts = await api.entities.Cart.filter({ vendor_id: user.id });
+
       if (carts.length > 0) {
         cartId = carts[0].id;
       } else {
-        const newCart = await base44.entities.Cart.create({
-            vendor_id: user.id,
-            global_margin_percent: 20
+        const newCart = await api.entities.Cart.create({
+          vendor_id: user.id,
+          global_margin_percent: 20
         });
         cartId = newCart.id;
       }
 
       // 2. Process items
       for (const item of itemsToExport) {
-        // Check if item already exists in cart
-        const existingItems = await base44.entities.CartItem.filter({
+        const existingItems = await api.entities.CartItem.filter({
           vendor_id: user.id,
           product_id: item.product_id
         });
 
         if (existingItems.length > 0) {
-          // Update quantity (add to existing)
           const existingItem = existingItems[0];
-          await base44.entities.CartItem.update(existingItem.id, {
+          await api.entities.CartItem.update(existingItem.id, {
             quantity: existingItem.quantity + (parseFloat(item.quantity) || 1)
           });
         } else {
-          // Find product image from the products list we already fetched
           const productInfo = products.find(p => p.id === item.product_id);
 
-          // Create new cart item
-          await base44.entities.CartItem.create({
+          await api.entities.CartItem.create({
             cart_id: cartId,
             vendor_id: user.id,
             supplier_id: item.supplier_id,
@@ -332,8 +387,8 @@ export default function QuoteBuilder() {
             unit_of_measure: item.unit_of_measure || 'unit',
             quantity: parseFloat(item.quantity) || 1,
             unit_cost_price: parseFloat(item.unit_cost_price) || 0,
-            margin_percent: item.margin_percent !== null && item.margin_percent !== '' 
-              ? parseFloat(item.margin_percent) 
+            margin_percent: item.margin_percent !== null && item.margin_percent !== ''
+              ? parseFloat(item.margin_percent)
               : null
           });
         }
@@ -342,12 +397,12 @@ export default function QuoteBuilder() {
       toast.success('Productos exportados al carrito correctamente');
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
       navigate(createPageUrl('VendorCart'));
-
     } catch (error) {
       console.error('Export failed:', error);
       toast.error('Error al exportar al carrito');
+    } finally {
+      setExporting(false);
     }
-    setExporting(false);
   };
 
   const visibleItems = lineItems.filter(item => !item.isDeleted);
@@ -369,6 +424,7 @@ export default function QuoteBuilder() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
+
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-[#F5F5F5]">
             {quoteId ? 'Editar presupuesto' : 'Nuevo presupuesto'}
@@ -377,6 +433,7 @@ export default function QuoteBuilder() {
             {quoteData.quote_number || 'Crear un nuevo presupuesto'}
           </p>
         </div>
+
         <div className="flex gap-2">
           {quoteId && (
             <Button
@@ -389,6 +446,7 @@ export default function QuoteBuilder() {
               <Trash2 className="w-4 h-4" />
             </Button>
           )}
+
           <Button
             onClick={handleExportToCart}
             disabled={exporting || visibleItems.length === 0}
@@ -402,6 +460,7 @@ export default function QuoteBuilder() {
             )}
             Exportar al carrito
           </Button>
+
           <Button
             onClick={handleSave}
             disabled={saving}
@@ -428,6 +487,7 @@ export default function QuoteBuilder() {
                 Información del cliente
               </CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -439,6 +499,7 @@ export default function QuoteBuilder() {
                     className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label className="text-[#B0B0B0]">Empresa</Label>
                   <Input
@@ -448,22 +509,30 @@ export default function QuoteBuilder() {
                     className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label className="text-[#B0B0B0]">Correo electrónico</Label>
                   <Input
                     type="email"
+                    inputMode="email"
                     value={quoteData.customer_email}
                     onChange={(e) => setQuoteData({ ...quoteData, customer_email: e.target.value })}
                     placeholder="juan@ejemplo.com"
                     className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label className="text-[#B0B0B0]">Teléfono</Label>
                   <Input
+                    type="tel"
+                    inputMode="tel"
                     value={quoteData.customer_phone}
-                    onChange={(e) => setQuoteData({ ...quoteData, customer_phone: e.target.value })}
-                    placeholder="+1 234 567 890"
+                    onChange={(e) => {
+                      const v = normalizePhone(e.target.value);
+                      setQuoteData({ ...quoteData, customer_phone: v });
+                    }}
+                    placeholder="+54 11 2345-6789"
                     className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                   />
                 </div>
@@ -479,6 +548,7 @@ export default function QuoteBuilder() {
                 Configuración del presupuesto
               </CardTitle>
             </CardHeader>
+
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
@@ -490,6 +560,7 @@ export default function QuoteBuilder() {
                     className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label className="text-[#B0B0B0]">Estado</Label>
                   <Select
@@ -501,11 +572,14 @@ export default function QuoteBuilder() {
                     </SelectTrigger>
                     <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
                       {STATUSES.map(s => (
-                        <SelectItem key={s} value={s} className="text-[#F5F5F5] focus:bg-[#2A2A2A]">{s}</SelectItem>
+                        <SelectItem key={s} value={s} className="text-[#F5F5F5] focus:bg-[#2A2A2A]">
+                          {s}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="space-y-2">
                   <Label className="text-[#B0B0B0]">Margen global %</Label>
                   <Input
@@ -530,6 +604,7 @@ export default function QuoteBuilder() {
                   <Package className="w-5 h-5 text-[#E53935]" />
                   Ítems ({visibleItems.length})
                 </CardTitle>
+
                 <Button
                   onClick={() => setAddItemOpen(true)}
                   variant="outline"
@@ -541,6 +616,7 @@ export default function QuoteBuilder() {
                 </Button>
               </div>
             </CardHeader>
+
             <CardContent>
               {visibleItems.length === 0 ? (
                 <div className="text-center py-12 border-2 border-dashed border-[#2A2A2A] rounded-xl">

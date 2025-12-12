@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -19,7 +19,7 @@ export default function RegisterPage() {
 
   const registerMutation = useMutation({
     mutationFn: ({ name, email, password, user_role }) =>
-      base44.auth.register({ name, email, password, user_role }),
+      api.auth.register({ name, email, password, user_role }),
     onSuccess: (user) => {
       // redirigimos según rol
       if (user.user_role === "Supplier") {

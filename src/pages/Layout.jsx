@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
-import { base44 } from '@/api/base44Client';
+import { api } from "@/api/apiClient";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Building2, 
@@ -38,18 +38,18 @@ export default function Layout({ children, currentPageName }) {
 
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me()
+    queryFn: () => api.auth.me()
   });
 
   const { data: cartItems = [] } = useQuery({
     queryKey: ['cartItems', user?.id],
-    queryFn: () => base44.entities.CartItem.filter({ vendor_id: user.id }),
+    queryFn: () => api.entities.CartItem.filter({ vendor_id: user.id }),
     enabled: !!user?.id && user?.user_role === 'Vendor'
   });
 
   // 🔐 logout real: llama al backend, limpia cache y manda a /login
   const logoutMutation = useMutation({
-    mutationFn: () => base44.auth.logout(),
+    mutationFn: () => api.auth.logout(),
     onSuccess: async () => {
       await queryClient.clear();
       navigate('/login');
