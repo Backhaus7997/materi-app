@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "node --test"
+    "start": "node index.js"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
@@ -16,7 +15,6 @@
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
-    "prisma": "^6.18.0",
-    "supertest": "file:vendor/supertest"
+    "prisma": "^6.18.0"
   }
 }
