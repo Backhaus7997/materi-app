@@ -213,28 +213,28 @@ export default function Quotes() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-[#2A2A2A] border-[#2A2A2A]">
-                  <TableHead className="font-semibold text-[#B0B0B0]">
+                  <TableHead className="font-semibold text-[#B0B0B0] text-center">
                     Presupuesto #
                   </TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0]">
+                  <TableHead className="font-semibold text-[#B0B0B0] text-center">
                     Cliente
                   </TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0] hidden md:table-cell">
+                  <TableHead className="font-semibold text-[#B0B0B0] hidden md:table-cell text-center">
                     Fecha
                   </TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0]">
+                  <TableHead className="font-semibold text-[#B0B0B0] text-center">
                     Estado
                   </TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0] text-right hidden sm:table-cell">
+                  <TableHead className="font-semibold text-[#B0B0B0] text-center hidden sm:table-cell">
                     Costo
                   </TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0] text-right hidden sm:table-cell">
+                  <TableHead className="font-semibold text-[#B0B0B0] text-center hidden sm:table-cell">
                     Venta
                   </TableHead>
-                  <TableHead className="font-semibold text-[#B0B0B0] text-right">
+                  <TableHead className="font-semibold text-[#B0B0B0] text-center">
                     Ganancia
                   </TableHead>
-                  <TableHead className="w-12"></TableHead>
+                  <TableHead className="w-12 text-center"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -243,12 +243,12 @@ export default function Quotes() {
                     key={quote.id}
                     className="hover:bg-[#2A2A2A]/50 border-[#2A2A2A]"
                   >
-                    <TableCell>
+                    <TableCell className="text-center align-middle">
                       <span className="font-mono font-medium text-[#E53935]">
                         {quote.quote_number || `Q-${quote.id?.slice(-6)}`}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center align-middle">
                       <div>
                         <p className="font-medium text-[#F5F5F5]">
                           {quote.customer_name}
@@ -260,12 +260,41 @@ export default function Quotes() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-[#B0B0B0] hidden md:table-cell">
-                      {quote.created_date
-                        ? format(new Date(quote.created_date), 'MMM d, yyyy')
-                        : '—'}
+                    <TableCell className="text-center align-middle text-[#B0B0B0] hidden md:table-cell">
+                      {(() => {
+                        const created =
+                          quote.created_date ??
+                          quote.createdAt ??
+                          quote.created_at ??
+                          quote.createdDate                   ;
+
+                        const updated =
+                          quote.updated_date ??
+                          quote.updatedAt ??
+                          quote.updated_at ??
+                          quote.updatedDate ??
+                          quote.modified_date ??
+                          quote.modifiedAt ??
+                          quote.modified_at                   ;
+
+                        const createdText = created ? format(new Date(created), "dd/MM/yyyy") : "—";
+                        const updatedText = updated ? format(new Date(updated), "dd/MM/yyyy") : null                    ;
+
+                        return (
+                          <div className="leading-tight">
+                            <div className="text-[#B0B0B0]">{createdText}</div                    >
+
+                            {updatedText && (
+                              <div className="text-xs text-[#666] mt-1">
+                                Modificado: {updatedText}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </TableCell>
-                    <TableCell>
+
+                    <TableCell className="text-center align-middle">
                       <Badge
                         className={
                           STATUS_COLORS[quote.status] || STATUS_COLORS.Draft
@@ -274,13 +303,13 @@ export default function Quotes() {
                         {quote.status || 'Draft'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-[#B0B0B0] hidden sm:table-cell">
+                    <TableCell className="text-center align-middle text-[#B0B0B0] hidden sm:table-cell">
                       ${(quote.total_cost || 0).toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right font-medium text-[#F5F5F5] hidden sm:table-cell">
+                    <TableCell className="text-center align-middle font-medium text-[#F5F5F5] hidden sm:table-cell">
                       ${(quote.total_sale_price || 0).toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-center align-middle">
                       <span
                         className={`font-semibold ${
                           (quote.total_profit_amount || 0) >= 0
@@ -291,7 +320,7 @@ export default function Quotes() {
                         ${(quote.total_profit_amount || 0).toFixed(2)}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center align-middle">
                       <Link
                         to={createPageUrl(`QuoteBuilder?id=${quote.id}`)}
                       >
