@@ -90,22 +90,26 @@ Prisma, etc.).
 
 ### 3. Variables de entorno
 
-Crear un archivo `.env` dentro de `materi-backend` con al menos:
+Copia el archivo `.env.example` dentro de `materi-backend` y renómbralo
+como `.env`, o crea uno manualmente con al menos:
 
 ``` env
 DATABASE_URL="file:./dev.db"
 JWT_SECRET="cambia-esto-por-algo-mas-seguro"
 NODE_ENV="development"
 PORT=4000
+CORS_ORIGIN="http://localhost:5173,/^https?:\\/\\/localhost:\\d+$/"
 ```
 
 Descripción de variables:
 
 -   `DATABASE_URL` → ruta del archivo SQLite (modo desarrollo).
--   `JWT_SECRET` → clave usada para firmar los JWT. En desarrollo puede
-    ser cualquier string.
+-   `JWT_SECRET` → clave usada para firmar los JWT. **La API no arranca**
+    si esta variable falta.
 -   `NODE_ENV` → normalmente `"development"` para entorno local.
 -   `PORT` → puerto donde va a correr el backend.
+-   `CORS_ORIGIN` → lista separada por comas de URLs permitidas o
+    expresiones regulares con la forma `/patron/flags`. Ejemplo: `http://localhost:5173,/^https?:\\/\\/mi-app\\.local/`
 
 ------------------------------------------------------------------------
 

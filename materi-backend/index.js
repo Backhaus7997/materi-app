@@ -11,14 +11,47 @@ const prisma = new PrismaClient();
 const app = express();
 
 const PORT = process.env.PORT || 4000;
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-super-inseguro";
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET es obligatorio. Defínelo en el entorno antes de iniciar la API.");
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "7d";
+const DEFAULT_CORS_ORIGINS = ["http://localhost:5173"];
+
+function parseCorsOrigin(rawValue) {
+  if (!rawValue) return DEFAULT_CORS_ORIGINS;
+
+  const entries = rawValue
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const regexMatch = entry.match(/^\/(.*)\/([dgimsuvy]*)$/);
+      if (regexMatch) {
+        const [, pattern, flags] = regexMatch;
+        try {
+          return new RegExp(pattern, flags);
+        } catch (err) {
+          throw new Error(
+            `CORS_ORIGIN contiene una expresión regular inválida: ${entry}. ${err.message}`
+          );
+        }
+      }
+      return entry;
+    });
+
+  return entries.length > 0 ? entries : DEFAULT_CORS_ORIGINS;
+}
+
+const CORS_ORIGIN = parseCorsOrigin(process.env.CORS_ORIGIN);
 
 // ---------- Middlewares base ----------
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: CORS_ORIGIN,
     credentials: true,
   })
 );
@@ -894,6 +927,14 @@ process.on("SIGINT", async () => {
   process.exit(0);
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ API escuchando en http://localhost:${PORT}`);
-});
+function startServer() {
+  return app.listen(PORT, () => {
+    console.log(`✅ API escuchando en http://localhost:${PORT}`);
+  });
+}
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { app, startServer, prisma };
