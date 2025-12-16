@@ -116,7 +116,7 @@ export default function VendorCart() {
         const supplier = suppliers.find((s) => s.id === sid);
         grouped[sid] = {
           supplierName: item.supplier_name ?? item.supplierName ?? supplier?.name ?? 'Proveedor',
-          supplierPhone: supplier?.phone || '',
+          supplierPhone: supplier?.phone || item.supplier_phone || item.supplierPhone || '',
           items: [],
         };
       }
@@ -367,23 +367,32 @@ export default function VendorCart() {
                         <p className="text-xs text-[#B0B0B0]">{data.items.length} ítems</p>
                       </div>
                       {whatsappLink ? (
-                        <a 
-                          href={whatsappLink} 
-                          target="_blank" 
+                        <a
+                          href={whatsappLink}
+                          target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
+                          title="Contactar por WhatsApp"
+                          className="
+                            inline-flex items-center justify-center
+                            w-10 h-10
+                            rounded-full
+                            bg-emerald-600
+                            hover:bg-emerald-700
+                            transition-colors
+                          "
                         >
-                          <MessageCircle className="w-4 h-4 mr-2" />
-                          WhatsApp
+                          <MessageCircle className="w-5 h-5 text-white" />
                         </a>
                       ) : (
                         <span className="text-xs text-[#B0B0B0] italic">Sin teléfono</span>
                       )}
+
                     </div>
                   );
                 })}
               </CardContent>
             </Card>
+
             </div>
           </div>
         </div>
