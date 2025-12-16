@@ -254,18 +254,6 @@ export default function VendorCart() {
                             className="w-20 h-9 bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                           />
                         </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs text-[#B0B0B0]">Margen %</Label>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.1"
-                            value={item.margin_percent ?? ''}
-                            onChange={(e) => handleMarginChange(item, e.target.value)}
-                            placeholder={`${globalMargin}`}
-                            className="w-20 h-9 bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] placeholder:text-[#666]"
-                          />
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -334,7 +322,7 @@ export default function VendorCart() {
                     </div>
                     {calculations.subtotalCost > 0 && (
                       <p className="text-right text-sm text-[#B0B0B0] mt-1">
-                        {((calculations.totalProfit / calculations.subtotalCost) * 100).toFixed(1)}% markup
+                        {((calculations.totalProfit / calculations.subtotalCost) * 100).toFixed(1)}% Margen
                       </p>
                     )}
                   </div>

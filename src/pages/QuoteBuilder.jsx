@@ -177,10 +177,7 @@ export default function QuoteBuilder() {
     lineItems.forEach(item => {
       const unitCost = parseFloat(item.unit_cost_price) || 0;
       const qty = parseFloat(item.quantity) || 0;
-      const itemMargin =
-        item.margin_percent !== null && item.margin_percent !== undefined && item.margin_percent !== ''
-          ? parseFloat(item.margin_percent)
-          : globalMargin;
+      const itemMargin = globalMargin; // SOLO margen global
 
       const lineCost = unitCost * qty;
       const unitSale = unitCost * (1 + itemMargin / 100);
@@ -204,6 +201,7 @@ export default function QuoteBuilder() {
 
     setLineItems([...lineItems, {
       ...item,
+      margin_percent: null,
       line_cost_total: unitCost * qty,
       unit_sale_price: unitSale,
       line_sale_total: unitSale * qty,
@@ -214,7 +212,7 @@ export default function QuoteBuilder() {
 
   const handleUpdateItem = (index, updatedItem) => {
     const newItems = [...lineItems];
-    newItems[index] = { ...updatedItem, isModified: true };
+    newItems[index] = { ...updatedItem, margin_percent: null,isModified: true };
     setLineItems(newItems);
   };
 
@@ -723,7 +721,7 @@ export default function QuoteBuilder() {
                   </div>
                   {totals.totalCost > 0 && (
                     <p className="text-right text-sm text-[#B0B0B0] mt-1">
-                      {((totals.totalProfit / totals.totalCost) * 100).toFixed(1)}% margen
+                      {((totals.totalProfit / totals.totalCost) * 100).toFixed(1)}% Margen
                     </p>
                   )}
                 </div>
