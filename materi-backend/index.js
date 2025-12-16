@@ -541,9 +541,14 @@ app.get("/cart-items", async (req, res) => {
     const items = await prisma.cartItem.findMany({
       where,
       orderBy: { createdAt: "desc" },
+      include: {
+        supplier: { select: { id:true, name:true, company_name:true, phone:true, email:true } },
+        product: { select: { id:true, name:true, supplierId:true, supplier_name:true, unit_of_measure:true, base_price:true, currency:true } },
+      },
     });
 
-    res.json(items);
+res.json(items.map(i => ({ ...i, supplier_phone: i?.supplier?.phone || null })));
+
   } catch (err) {
     console.error("Error GET /cart-items", err);
     res.status(500).json({ error: "Error al obtener items del carrito" });
@@ -600,7 +605,7 @@ app.post('/cart-items', async (req, res) => {
       },
     });
 
-    return res.status(201).json(item);
+    return res.status(201).json({ ...item, supplier_phone: item?.supplier?.phone || null });
   } catch (err) {
     console.error('Error POST /cart-items', err);
     return res.status(500).json({
@@ -652,7 +657,7 @@ app.patch("/cart-items/:id", async (req, res) => {
       data: updateData,
     });
 
-    res.json(item);
+    res.json({ ...item, supplier_phone: item?.supplier?.phone || null });
   } catch (err) {
     console.error("Error PATCH /cart-items/:id", err);
     res.status(500).json({ error: "Error al actualizar item de carrito" });

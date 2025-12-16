@@ -89,26 +89,36 @@ export default function ProductDetail() {
         const newTotalQty = currentQty + addQty;
         
         console.log(`Updating item ${existingItem.id} to quantity ${newTotalQty}`);
-        return await api.entities.CartItem.update(existingItem.id, {
-          quantity: newTotalQty
+        return await await api.entities.CartItem.update(existingItem.id, {
+          quantity: newQty,
+          supplier_id: supplierId,
+          supplier_name: supplierName
         });
+
       } else {
         // Create new cart item
         console.log("Creating new cart item");
+        const supplierId = product.supplier_id ?? product.supplierId ?? "";
+        const supplierName = product.supplier_name ?? product.supplierName ?? product.supplier_name ?? "";
+
         return await api.entities.CartItem.create({
           cart_id: cartId,
           vendor_id: user.id,
-          supplier_id: product.supplier_id,
-          supplier_name: product.supplier_name,
+        
+          // CLAVE: que siempre quede guardado el supplier_id correcto
+          supplier_id: supplierId,
+          supplier_name: supplierName,
+        
           product_id: product.id,
           product_name: product.name,
-          product_description: product.description || '',
-          product_image_url: product.image_url || '',
-          unit_of_measure: product.unit_of_measure || 'unit',
+          product_description: product.description || "",
+          product_image_url: product.image_url || "",
+          unit_of_measure: product.unit_of_measure || "unit",
           quantity: parseFloat(quantityToAdd) || 1,
           unit_cost_price: parseFloat(product.base_price) || 0,
           margin_percent: null
         });
+
       }
     },
     onSuccess: () => {
