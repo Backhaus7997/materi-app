@@ -127,7 +127,7 @@ export default function QuoteLineItemRow({
           </p>
         </div>
         <div>
-          <p className="text-[#B0B0B0]">Markup</p>
+          <p className="text-[#B0B0B0]">Margen</p>
           <p className="font-medium text-[#F5F5F5]">{globalMargin}%</p>
         </div>
       </div>

@@ -152,7 +152,7 @@ export default function VendorCart() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F5F5F5]">Carrito / Constructor de presupuestos</h1>
+          <h1 className="text-2xl font-bold text-[#F5F5F5]">Carrito</h1>
           <p className="text-[#B0B0B0] mt-1">Construye tu presupuesto con los productos seleccionados</p>
         </div>
         <div className="flex items-center gap-4">

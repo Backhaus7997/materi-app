@@ -24,7 +24,7 @@ const vendorNavItems = [
   { name: 'Panel', icon: Home, page: 'VendorDashboard' },
   { name: 'Proveedores', icon: Building2, page: 'VendorSuppliers' },
   { name: 'Productos', icon: Package, page: 'VendorProducts' },
-  { name: 'Carrito / Presupuesto', icon: ShoppingCart, page: 'VendorCart' },
+  { name: 'Carrito', icon: ShoppingCart, page: 'VendorCart' },
   { name: 'Presupuestos', icon: FileText, page: 'Quotes' },
 ];
 
