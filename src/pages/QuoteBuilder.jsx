@@ -131,12 +131,34 @@ export default function QuoteBuilder() {
 
   useEffect(() => {
     if (existingLineItems.length > 0) {
-      setLineItems(existingLineItems.map(item => ({
-        ...item,
-        isExisting: true
-      })));
+      setLineItems(
+        existingLineItems.map((item) => ({
+          ...item,
+        
+          // ✅ normalización de ids (backend puede devolver camelCase)
+          quote_id: item.quote_id ?? item.quoteId,
+          supplier_id: item.supplier_id ?? item.supplierId ?? '',
+          product_id: item.product_id ?? item.productId ?? '',
+        
+          // ✅ normalización de nombres
+          supplier_name: item.supplier_name ?? item.supplierName ?? '',
+          product_name: item.product_name ?? item.productName ?? '',
+          product_description_snapshot:
+            item.product_description_snapshot ??
+            item.product_description ??
+            item.productDescriptionSnapshot ??
+            '',
+        
+          // ✅ normalización de otros campos comunes
+          unit_of_measure: item.unit_of_measure ?? item.unitOfMeasure ?? 'unit',
+          unit_cost_price: item.unit_cost_price ?? item.unitCostPrice ?? 0,
+        
+          isExisting: true,
+        }))
+      );
     }
   }, [existingLineItems]);
+
 
   // Generate quote number for new quotes
   useEffect(() => {
@@ -244,76 +266,77 @@ export default function QuoteBuilder() {
 
     setSaving(true);
 
-    try {
-      // Datos comunes del presupuesto
-      const basePayload = {
-        ...quoteData,
-        vendor_id: user.id,
-        global_margin_percent: parseFloat(quoteData.global_margin_percent) || 0,
-        total_cost: totals.totalCost,
-        total_sale_price: totals.totalSale,
-        total_profit_amount: totals.totalProfit,
-        // normalizamos un poco el teléfono para evitar caracteres raros
-        customer_phone: normalizePhone(quoteData.customer_phone),
-        customer_email: quoteData.customer_email?.trim() || '',
-      };
-
-      let savedQuoteId = quoteId;
-
-      // → si es edición
-      if (quoteId) {
-        await api.entities.Quote.update(quoteId, basePayload);
-      } else {
-        // → si es nuevo
-        const created = await api.entities.Quote.create(basePayload);
-        savedQuoteId = created.id;
-      }
-
-      // ---------- Line items ----------
-      for (const item of lineItems) {
-        const itemPayload = {
-          quote_id: savedQuoteId,
-          supplier_id: item.supplier_id,
-          supplier_name: item.supplier_name,
-          product_id: item.product_id,
-          product_name: item.product_name,
-          product_description_snapshot: item.product_description_snapshot,
-          unit_of_measure: item.unit_of_measure,
-          quantity: parseFloat(item.quantity) || 1,
-          unit_cost_price: parseFloat(item.unit_cost_price) || 0,
-          line_cost_total: parseFloat(item.line_cost_total) || 0,
-          margin_percent:
-            item.margin_percent !== null && item.margin_percent !== ''
-              ? parseFloat(item.margin_percent)
-              : null,
-          unit_sale_price: parseFloat(item.unit_sale_price) || 0,
-          line_sale_total: parseFloat(item.line_sale_total) || 0,
-          line_profit_amount: parseFloat(item.line_profit_amount) || 0,
+      try {
+        // Datos comunes del presupuesto
+        const basePayload = {
+          ...quoteData,
+          vendor_id: user.id,
+          global_margin_percent: parseFloat(quoteData.global_margin_percent) || 0,
+          total_cost: totals.totalCost,
+          total_sale_price: totals.totalSale,
+          total_profit_amount: totals.totalProfit,
+          // normalizamos un poco el teléfono para evitar caracteres raros
+          customer_phone: normalizePhone(quoteData.customer_phone),
+          customer_email: quoteData.customer_email?.trim() || '',
         };
 
-        if (item.isDeleted && item.id) {
-          await api.entities.QuoteLineItem.delete(item.id);
-        } else if (item.isNew) {
-          await api.entities.QuoteLineItem.create(itemPayload);
-        } else if (item.isModified && item.id) {
-          await api.entities.QuoteLineItem.update(item.id, itemPayload);
+        let savedQuoteId = quoteId;
+
+        // → si es edición
+        if (quoteId) {
+          await api.entities.Quote.update(quoteId, basePayload);
+        } else {
+          // → si es nuevo
+          const created = await api.entities.Quote.create(basePayload);
+          savedQuoteId = created.id;
         }
+
+        // ---------- Line items ----------
+        for (const item of lineItems) {
+          const itemPayload = {
+            quote_id: savedQuoteId,
+            supplier_id: item.supplier_id,
+            supplier_name: item.supplier_name,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            product_description_snapshot: item.product_description_snapshot,
+            unit_of_measure: item.unit_of_measure,
+            quantity: parseFloat(item.quantity) || 1,
+            unit_cost_price: parseFloat(item.unit_cost_price) || 0,
+            line_cost_total: parseFloat(item.line_cost_total) || 0,
+            margin_percent:
+              item.margin_percent !== null && item.margin_percent !== ''
+                ? parseFloat(item.margin_percent)
+                : null,
+            unit_sale_price: parseFloat(item.unit_sale_price) || 0,
+            line_sale_total: parseFloat(item.line_sale_total) || 0,
+            line_profit_amount: parseFloat(item.line_profit_amount) || 0,
+          };
+
+          if (item.isDeleted && item.id) {
+            await api.entities.QuoteLineItem.delete(item.id);
+          } else if (item.isNew) {
+            await api.entities.QuoteLineItem.create(itemPayload);
+          } else if (item.isModified && item.id) {
+            await api.entities.QuoteLineItem.update(item.id, itemPayload);
+          }
+        }
+
+        // Refrescar caches
+        queryClient.invalidateQueries({ queryKey: ['quotes', user?.id] });
+        queryClient.invalidateQueries({ queryKey: ['quotes'] });
+        queryClient.invalidateQueries({ queryKey: ['quote', savedQuoteId] });
+        queryClient.invalidateQueries({ queryKey: ['quoteLineItems', savedQuoteId] });
+
+        toast.success("Presupuesto guardado ✅");
+        navigate(createPageUrl('Quotes'));
+      } catch (err) {
+        console.error("Error guardando presupuesto:", err);
+        toast.error("Error al guardar el presupuesto");
+      } finally {
+        setSaving(false);
       }
-
-      // Refrescar caches
-      queryClient.invalidateQueries({ queryKey: ['quotes'] });
-      queryClient.invalidateQueries({ queryKey: ['quote', savedQuoteId] });
-      queryClient.invalidateQueries({ queryKey: ['quoteLineItems', savedQuoteId] });
-
-      toast.success("Presupuesto guardado ✅");
-      navigate(createPageUrl('Quotes'));
-    } catch (err) {
-      console.error("Error guardando presupuesto:", err);
-      toast.error("Error al guardar el presupuesto");
-    } finally {
-      setSaving(false);
-    }
-  };
+    };
 
   const handleDeleteQuote = async () => {
     if (!window.confirm('¿Estás seguro de que quieres eliminar este presupuesto? Esta acción no se puede deshacer.')) {
@@ -395,6 +418,7 @@ export default function QuoteBuilder() {
       }
 
       toast.success('Productos exportados al carrito correctamente');
+      queryClient.invalidateQueries({ queryKey: ['cartItems', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
       navigate(createPageUrl('VendorCart'));
     } catch (error) {

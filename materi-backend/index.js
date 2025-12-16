@@ -550,46 +550,66 @@ app.get("/cart-items", async (req, res) => {
   }
 });
 
-app.post("/cart-items", async (req, res) => {
+app.post('/cart-items', async (req, res) => {
   try {
-    const data = req.body;
+    // ✅ soporta body plano o envuelto en { data: ... }
+    const body = (req.body && req.body.data) ? req.body.data : (req.body || {});
 
-    if (!data.cart_id) return res.status(400).json({ error: "cart_id es requerido" });
-    if (!data.product_id) return res.status(400).json({ error: "product_id es requerido" });
+    console.log('POST /cart-items => body:', body);
+
+    // ✅ soporta snake_case y camelCase
+    const cartId = body.cart_id || body.cartId;
+    const productId = body.product_id || body.productId;
+
+    // vendor/supplier pueden o no venir (pero los soportamos igual)
+    const vendorId = body.vendor_id || body.vendorId || null;
+    const supplierId = body.supplier_id || body.supplierId || null;
+
+    if (!cartId) return res.status(400).json({ error: 'cart_id es requerido' });
+    if (!productId) return res.status(400).json({ error: 'product_id es requerido' });
 
     const quantity =
-      data.quantity !== undefined && data.quantity !== null ? Number(data.quantity) : 1;
+      body.quantity !== undefined && body.quantity !== null ? Number(body.quantity) : 1;
+
     const unitCost =
-      data.unit_cost_price !== undefined && data.unit_cost_price !== null
-        ? Number(data.unit_cost_price)
+      body.unit_cost_price !== undefined && body.unit_cost_price !== null
+        ? Number(body.unit_cost_price)
         : 0;
 
     const item = await prisma.cartItem.create({
       data: {
-        cartId: data.cart_id,
-        vendorId: data.vendor_id || null,
-        supplierId: data.supplier_id || null,
-        supplier_name: data.supplier_name || null,
-        productId: data.product_id,
-        product_name: data.product_name || null,
-        product_description: data.product_description || null,
-        product_image_url: data.product_image_url || null,
-        unit_of_measure: data.unit_of_measure || null,
-        quantity: isNaN(quantity) ? 1 : quantity,
-        unit_cost_price: isNaN(unitCost) ? 0 : unitCost,
+        cartId,
+        productId,
+
+        vendorId,
+        supplierId,
+        supplier_name: body.supplier_name || null,
+
+        product_name: body.product_name || null,
+        product_description: body.product_description || null,
+        product_image_url: body.product_image_url || null,
+
+        unit_of_measure: body.unit_of_measure || 'unit',
+        quantity: Number.isNaN(quantity) ? 1 : quantity,
+        unit_cost_price: Number.isNaN(unitCost) ? 0 : unitCost,
+
         margin_percent:
-          data.margin_percent !== undefined && data.margin_percent !== null
-            ? Number(data.margin_percent)
+          body.margin_percent !== undefined && body.margin_percent !== null && body.margin_percent !== ''
+            ? Number(body.margin_percent)
             : null,
       },
     });
 
-    res.status(201).json(item);
+    return res.status(201).json(item);
   } catch (err) {
-    console.error("Error POST /cart-items", err);
-    res.status(500).json({ error: "Error al crear item de carrito" });
+    console.error('Error POST /cart-items', err);
+    return res.status(500).json({
+      error: 'Error al crear item de carrito',
+      detail: err.message,
+    });
   }
 });
+
 
 app.patch("/cart-items/:id", async (req, res) => {
   try {
