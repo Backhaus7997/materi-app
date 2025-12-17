@@ -198,15 +198,7 @@ export default function Quotes() {
             <p className="text-[#B0B0B0] text-lg">
               No se encontraron presupuestos
             </p>
-            <p className="text-[#666] text-sm mt-1">
-              Crea tu primer presupuesto para comenzar
-            </p>
-            <Link to={createPageUrl('QuoteBuilder')}>
-              <Button className="mt-4 bg-[#E53935] hover:bg-[#C62828] text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Crear presupuesto
-              </Button>
-            </Link>
+           
           </div>
         ) : (
           <div className="overflow-x-auto">

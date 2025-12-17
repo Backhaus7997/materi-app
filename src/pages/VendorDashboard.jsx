@@ -214,9 +214,10 @@ export default function VendorDashboard() {
               <FileText className="w-12 h-12 mx-auto mb-3 text-[#2A2A2A]" />
               <p className="text-[#B0B0B0]">Todavía no hay presupuestos</p>
               <Link to={createPageUrl('VendorCart')}>
-                <Button variant="outline" className="mt-4 border-[#2A2A2A] text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]">
-                  Crea tu primer presupuesto
-                </Button>
+             <Button className="mt-4 bg-[#E53935] text-white hover:bg-[#C62828]">
+              Crea tu primer presupuesto
+            </Button>
+
               </Link>
             </div>
           ) : (

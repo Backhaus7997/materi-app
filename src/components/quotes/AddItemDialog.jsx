@@ -194,10 +194,8 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
                   className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                 />
               </div>
-              <Button
-                onClick={handleAdd}
-                className="bg-[#E53935] hover:bg-[#C62828] px-8"
-              >
+              <Button className="bg-[#E53935] text-white hover:bg-[#C62828]">
+                <Plus className="mr-2 h-4 w-4" />
                 Agregar ítem
               </Button>
             </div>

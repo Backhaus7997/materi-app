@@ -63,11 +63,11 @@ export default function SupplierForm({ open, onOpenChange, supplier, onSave }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+    <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5] materi-dialog">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-[#E53935]" />
-            {supplier ? 'Editar proveedor' : 'Agregar proveedor'}
+          <Building2 className="w-5 h-5 text-[#E53935]" />
+        <h2 className="text-[#99999]">Editar proveedor</h2>
           </DialogTitle>
         </DialogHeader>
 
@@ -169,14 +169,14 @@ export default function SupplierForm({ open, onOpenChange, supplier, onSave }) {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-            >
-              Cancelar
-            </Button>
+             <Button
+                  type="button"
+                  onClick={() => onOpenChange(true)}
+                  style={{ backgroundColor: "#2A2A2A", color: "#F5F5F5" }}
+                  className="flex-1 hover:opacity-90"
+                >
+                  Cancelar
+                </Button>
             <Button
               type="submit"
               disabled={saving || !formData.name}

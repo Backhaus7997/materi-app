@@ -117,8 +117,8 @@ button:focus-visible {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 0 78% 55%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
@@ -129,7 +129,7 @@ button:focus-visible {
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --ring: 0 78% 55%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -156,3 +156,26 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+.materi-dialog label {
+  color: #B0B0B0;
+}
+
+.materi-dialog :is(input, textarea, select) {
+  background: #1E1E1E;
+  border: 1px solid #2A2A2A;
+  color: #F5F5F5;
+}
+
+.materi-dialog :is(input, textarea, select)::placeholder {
+  color: #666;
+}
+
+.materi-dialog :is(input, textarea, select):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #E53935;
+}
+
+.materi-dialog button[data-state="checked"] {
+  background: #E53935 !important;
+}
+
