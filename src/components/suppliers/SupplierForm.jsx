@@ -169,14 +169,34 @@ export default function SupplierForm({ open, onOpenChange, supplier, onSave }) {
           </div>
 
           <div className="flex gap-3 pt-2">
+<<<<<<< HEAD
              <Button
                   type="button"
                   onClick={() => onOpenChange(true)}
+=======
+<<<<<<< Updated upstream
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+=======
+             <Button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+>>>>>>> feature/tobi
                   style={{ backgroundColor: "#2A2A2A", color: "#F5F5F5" }}
                   className="flex-1 hover:opacity-90"
                 >
                   Cancelar
                 </Button>
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> feature/tobi
             <Button
               type="submit"
               disabled={saving || !formData.name}

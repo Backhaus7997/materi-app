@@ -231,7 +231,7 @@ export default function ProductForm({ open, onOpenChange, product, suppliers, on
             <div className="col-span-3 sm:col-span-1 space-y-2">
               <Label>Moneda</Label>
               <Select value={formData.currency} onValueChange={(v) => setFormData({ ...formData, currency: v })}>
-                <SelectTrigger>
+                <SelectTrigger className="border-[#2A2A2A] bg-transparent text-[#F5F5F5] focus:ring-0 focus:ring-offset-0 focus:border-[#2A2A2A] focus-visible:ring-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -244,7 +244,7 @@ export default function ProductForm({ open, onOpenChange, product, suppliers, on
             <div className="col-span-3 sm:col-span-1 space-y-2">
               <Label>Unidad</Label>
               <Select value={formData.unit_of_measure} onValueChange={(v) => setFormData({ ...formData, unit_of_measure: v })}>
-                <SelectTrigger>
+                <SelectTrigger className="border-[#2A2A2A] bg-transparent text-[#F5F5F5] focus:ring-0 focus:ring-offset-0 focus:border-[#2A2A2A] focus-visible:ring-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -375,7 +375,7 @@ export default function SupplierDashboard() {
                 />
               </div>
 
-              <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
+              <Card className="bg-[#1E1E1E] border-[#2A2A2A] overflow-hidden">
                 {productsLoading ? (
                   <div className="flex items-center justify-center py-20">
                     <Loader2 className="w-8 h-8 animate-spin text-[#E53935]" />
@@ -390,7 +390,7 @@ export default function SupplierDashboard() {
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-[#2A2A2A] border-[#2A2A2A]">
+                        <TableRow className="bg-[#2A2A2A] border-[#2A2A2A] rounded-none">
                           <TableHead className="text-[#B0B0B0]">Producto</TableHead>
                           <TableHead className="hidden md:table-cell text-[#B0B0B0]">Código</TableHead>
                           <TableHead className="hidden lg:table-cell text-[#B0B0B0]">Categoría</TableHead>
