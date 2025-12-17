@@ -169,6 +169,7 @@ export default function SupplierForm({ open, onOpenChange, supplier, onSave }) {
           </div>
 
           <div className="flex gap-3 pt-2">
+<<<<<<< Updated upstream
             <Button
               type="button"
               variant="outline"
@@ -177,6 +178,16 @@ export default function SupplierForm({ open, onOpenChange, supplier, onSave }) {
             >
               Cancelar
             </Button>
+=======
+             <Button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  style={{ backgroundColor: "#2A2A2A", color: "#F5F5F5" }}
+                  className="flex-1 hover:opacity-90"
+                >
+                  Cancelar
+                </Button>
+>>>>>>> Stashed changes
             <Button
               type="submit"
               disabled={saving || !formData.name}
