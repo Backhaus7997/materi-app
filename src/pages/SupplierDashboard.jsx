@@ -297,7 +297,7 @@ export default function SupplierDashboard() {
                   <Building2 className="w-5 h-5 text-[#E53935]" />
                   Información del proveedor
                 </CardTitle>
-                <Button variant="outline" size="sm" className="border-[#2A2A2A] text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]" onClick={() => setSupplierFormOpen(true)}>
+                <Button variant="outline" size="sm" className="border-[#2A2A2A] text-[#99999] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]" onClick={() => setSupplierFormOpen(true)}>
                   <Pencil className="w-4 h-4 mr-2" />
                   Editar
                 </Button>
@@ -453,7 +453,7 @@ export default function SupplierDashboard() {
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="ghost" size="icon" className="h-8 w-8 text-[#B0B0B0] hover:bg-[#2A2A2A]">
-                                    <MoreHorizontal className="w-4 h-4" />
+                                    <MoreHorizontal className="w-4 h-4 text-[#00000] hover:bg-[#99999]" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-[#1E1E1E] border-[#2A2A2A]">
