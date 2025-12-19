@@ -38,6 +38,13 @@ const STATUS_COLORS = {
   Rejected: 'bg-red-900/30 text-red-400'
 };
 
+const STATUS_LABELS = {
+  Draft: "Borrador",
+  Sent: "Enviado",
+  Accepted: "Aceptado",
+  Rejected: "Rechazado",
+};
+
 export default function Quotes() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -87,7 +94,7 @@ export default function Quotes() {
   // stats (sobre los que ve este vendedor)
   const stats = useMemo(() => {
     const total = filteredQuotes.length;
-    const accepted = filteredQuotes.filter(q => q.status === 'Accepted').length;
+    const accepted = filteredQuotes.filter(q => q.status === 'Aceptados').length;
     const totalProfit = filteredQuotes.reduce(
       (sum, q) => sum + (q.total_profit_amount || 0),
       0
@@ -157,28 +164,28 @@ export default function Quotes() {
               value="all"
               className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
             >
-              Todos los estados
+              Todos 
             </SelectItem>
             <SelectItem
-              value="Draft"
+              value="Borrador"
               className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
             >
               Borrador
             </SelectItem>
             <SelectItem
-              value="Sent"
+              value="Enviado"
               className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
             >
               Enviado
             </SelectItem>
             <SelectItem
-              value="Accepted"
+              value="Aceptado"
               className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
             >
               Aceptado
             </SelectItem>
             <SelectItem
-              value="Rejected"
+              value="Rechazado"
               className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
             >
               Rechazado

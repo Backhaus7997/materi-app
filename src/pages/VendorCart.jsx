@@ -53,11 +53,10 @@ export default function VendorCart() {
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
     }
   });
-
   const handleQuantityChange = (item, newQuantity) => {
-    const qty = Math.max(0.01, parseFloat(newQuantity) || 1);
-    updateItemMutation.mutate({ id: item.id, data: { quantity: qty } });
-  };
+  const qty = Math.max(1, parseInt(newQuantity, 10) || 1);
+  updateItemMutation.mutate({ id: item.id, data: { quantity: qty } });
+};
 
   const handleMarginChange = (item, newMargin) => {
     const margin = newMargin === '' ? null : parseFloat(newMargin);
@@ -246,13 +245,15 @@ export default function VendorCart() {
                         <div className="space-y-1">
                           <Label className="text-xs text-[#B0B0B0]">Cant.</Label>
                           <Input
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            value={item.quantity}
-                            onChange={(e) => handleQuantityChange(item, e.target.value)}
-                            className="w-20 h-9 bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
-                          />
+                         type="number"
+                          min="1"
+                          step="1"
+                          inputMode="numeric"
+                          value={item.quantity}
+                          onChange={(e) => handleQuantityChange(item, e.target.value)}
+                          className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] focus-visible:ring-2 focus-visible:ring-[#E53935] focus-visible:ring-offset-0"
+                                                />
+
                         </div>
                       </div>
                     </div>

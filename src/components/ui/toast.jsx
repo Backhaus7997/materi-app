@@ -3,6 +3,8 @@ import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+
+
 const ToastProvider = React.forwardRef(({ ...props }, ref) => (
   <div
     ref={ref}
@@ -37,7 +39,9 @@ const toastVariants = cva(
   }
 );
 
-const Toast = React.forwardRef(({ className, variant, ...props }, ref) => {
+const Toast = React.forwardRef(({ className, variant, open, ...props }, ref) => {
+  if (open === false) return null;
+
   return (
     <div
       ref={ref}
@@ -47,6 +51,7 @@ const Toast = React.forwardRef(({ className, variant, ...props }, ref) => {
   );
 });
 Toast.displayName = "Toast";
+
 
 const ToastAction = React.forwardRef(({ className, ...props }, ref) => (
   <div

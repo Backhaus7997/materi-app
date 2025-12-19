@@ -171,7 +171,7 @@ export default function SupplierForm({ open, onOpenChange, supplier, onSave }) {
           <div className="flex gap-3 pt-2">
              <Button
                   type="button"
-                  onClick={() => onOpenChange(true)}
+                  onClick={() => onOpenChange(false)}
                   style={{ backgroundColor: "#2A2A2A", color: "#F5F5F5" }}
                   className="flex-1 hover:opacity-90"
                 >

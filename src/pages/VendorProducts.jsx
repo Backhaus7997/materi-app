@@ -69,60 +69,90 @@ export default function VendorProducts() {
         <h1 className="text-2xl font-bold text-[#F5F5F5]">Productos</h1>
         <p className="text-[#B0B0B0] mt-1">Explora todos los productos disponibles de proveedores</p>
       </div>
+<div className="flex flex-col sm:flex-row gap-3">
+  <div className="relative flex-1 max-w-md">
+    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B0B0B0]" />
+    <Input
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="Buscar productos..."
+      className="h-11 pl-10 rounded-xl bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5] placeholder:text-[#B0B0B0]"
+    />
+  </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B0B0B0]" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar productos..."
-            className="pl-10 bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5] placeholder:text-[#B0B0B0]"
-          />
-        </div>
-        <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-          <SelectTrigger className="w-full sm:w-48 bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5]">
-            <SelectValue placeholder="Todos los proveedores" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
-            <SelectItem value="all" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">Todos los proveedores</SelectItem>
-            {suppliers.map((supplier) => (
-              <SelectItem key={supplier.id} value={supplier.id} className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">
-                {supplier.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full sm:w-48 bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5]">
-            <SelectValue placeholder="Todas las categorías" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
-            <SelectItem value="all" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">Todas las categorías</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat} className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">{cat}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="flex gap-1 border border-[#2A2A2A] rounded-lg p-1 bg-[#1E1E1E]">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'ghost'}
-            size="icon"
-            className={`h-8 w-8 ${viewMode === 'grid' ? 'bg-[#E53935] hover:bg-[#C62828] text-white' : 'text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]'}`}
-            onClick={() => setViewMode('grid')}
-          >
-            <Grid3X3 className="w-4 h-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'ghost'}
-            size="icon"
-            className={`h-8 w-8 ${viewMode === 'list' ? 'bg-[#E53935] hover:bg-[#C62828] text-white' : 'text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]'}`}
-            onClick={() => setViewMode('list')}
-          >
-            <List className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+  <Select value={supplierFilter} onValueChange={setSupplierFilter}>
+    <SelectTrigger className="h-11 w-full sm:w-48 rounded-xl bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5]">
+      <SelectValue placeholder="Todos los proveedores" />
+    </SelectTrigger>
+    <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
+      <SelectItem value="all" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">
+        Todos los proveedores
+      </SelectItem>
+      {suppliers.map((supplier) => (
+        <SelectItem
+          key={supplier.id}
+          value={supplier.id}
+          className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
+        >
+          {supplier.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+
+  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+    <SelectTrigger className="h-11 w-full sm:w-48 rounded-xl bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5]">
+      <SelectValue placeholder="Todas las categorías" />
+    </SelectTrigger>
+    <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
+      <SelectItem value="all" className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]">
+        Todas las categorías
+      </SelectItem>
+      {categories.map((cat) => (
+        <SelectItem
+          key={cat}
+          value={cat}
+          className="text-[#F5F5F5] focus:bg-[#2A2A2A] focus:text-[#F5F5F5]"
+        >
+          {cat}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+
+  {/* Toggle vista */}
+  <div className="flex h-11 border border-[#2A2A2A] rounded-xl bg-[#1E1E1E] overflow-hidden">
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className={`h-11 w-11 rounded-none p-0 ${
+        viewMode === "grid"
+          ? "bg-[#E53935] hover:bg-[#C62828] text-white"
+          : "text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]"
+      }`}
+      onClick={() => setViewMode("grid")}
+    >
+      <Grid3X3 className="w-4 h-4" />
+    </Button>
+
+    <div className="w-px bg-[#2A2A2A]" />
+
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className={`h-11 w-11 rounded-none p-0 ${
+        viewMode === "list"
+          ? "bg-[#E53935] hover:bg-[#C62828] text-white"
+          : "text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]"
+      }`}
+      onClick={() => setViewMode("list")}
+    >
+      <List className="w-4 h-4" />
+    </Button>
+  </div>
+</div>
 
       {filteredProducts.length === 0 ? (
         <div className="text-center py-20">

@@ -1,24 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { api } from "@/api/apiClient";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
-import { 
-  Package, 
+import { useToast } from "@/components/ui/use-toast";
+
+import {
+  Package,
   ArrowLeft,
-  Loader2, 
+  Loader2,
   Building2,
   ShoppingCart,
   Check,
   Plus,
-  Minus
-} from 'lucide-react';
+  Minus,
+} from "lucide-react";
+
 
 export default function ProductDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -40,6 +42,15 @@ export default function ProductDetail() {
   });
 
   const product = products[0];
+  const { toast } = useToast();
+  const lastToastId = useRef(undefined);
+
+  const showToast = (opts) => {
+  if (lastToastId.current) toast.dismiss(lastToastId.current);
+
+  const t = toast({ duration: 2000, ...opts });
+  lastToastId.current = t.id;
+};
 
   const { data: supplier } = useQuery({
     queryKey: ['supplier', product?.supplier_id],
@@ -74,28 +85,30 @@ export default function ProductDetail() {
         throw new Error("Error al acceder al carrito: " + e.message);
       }
 
-      // Check if item already exists in cart - Using same filter logic as VendorCart
       const existingItems = await api.entities.CartItem.filter({
         vendor_id: user.id,
         product_id: product.id
       });
+
       console.log("Existing items:", existingItems);
 
       if (existingItems && existingItems.length > 0) {
-        // Update quantity
         const existingItem = existingItems[0];
         const currentQty = parseFloat(existingItem.quantity) || 0;
         const addQty = parseFloat(quantityToAdd) || 1;
         const newTotalQty = currentQty + addQty;
-        
-        console.log(`Updating item ${existingItem.id} to quantity ${newTotalQty}`);
-        return await await api.entities.CartItem.update(existingItem.id, {
-          quantity: newQty,
-          supplier_id: supplierId,
-          supplier_name: supplierName
-        });
 
-      } else {
+        const supplierId = product.supplier_id ?? product.supplierId ?? "";
+        const supplierName =
+          product.supplier_name ?? product.supplierName ?? product.supplier_name ?? "";
+
+        return await api.entities.CartItem.update(existingItem.id, {
+          quantity: newTotalQty,
+          supplier_id: supplierId,
+          supplier_name: supplierName,
+        });
+      
+        } else {
         // Create new cart item
         console.log("Creating new cart item");
         const supplierId = product.supplier_id ?? product.supplierId ?? "";
@@ -121,16 +134,21 @@ export default function ProductDetail() {
 
       }
     },
-    onSuccess: () => {
-      console.log("Add to cart successful, invalidating queries");
-      // Invalidate both the general list and the specific user list to be safe
-      queryClient.invalidateQueries({ queryKey: ['cartItems'] });
-      toast.success('Producto agregado al carrito');
-    },
-    onError: (error) => {
-      console.error("Error adding to cart:", error);
-      toast.error(error.message || 'Error al agregar producto');
-    }
+      
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+        showToast({
+          title: "Producto agregado",
+          description: "El producto se agregó correctamente al carrito.",
+        });
+      },
+      onError: (error) => {
+        showToast({
+          title: "Error",
+          description: error?.message || "Error al agregar producto",
+          variant: "destructive",
+        });
+      },
   });
 
   const handleAddToCart = () => {

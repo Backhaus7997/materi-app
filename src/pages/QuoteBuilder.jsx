@@ -36,7 +36,14 @@ import { toast } from "sonner";
 import QuoteLineItemRow from '@/components/quotes/QuoteLineItemRow';
 import AddItemDialog from '@/components/quotes/AddItemDialog';
 
-const STATUSES = ['Draft', 'Sent', 'Accepted', 'Rejected'];
+const STATUS_LABELS = {
+  Draft: "Borrador",
+  Sent: "Enviado",
+  Accepted: "Aceptado",
+  Rejected: "Rechazado",
+};
+
+const STATUSES = Object.keys(STATUS_LABELS);
 
 // ----------------- VALIDACIONES -----------------
 
@@ -439,64 +446,65 @@ export default function QuoteBuilder() {
   }
 
   return (
-    <div className="space-y-6 pb-24">
-      <div className="flex items-center gap-4">
-        <Link to={createPageUrl('Quotes')}>
-          <Button variant="ghost" size="icon" className="shrink-0">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        </Link>
 
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-[#F5F5F5]">
-            {quoteId ? 'Editar presupuesto' : 'Nuevo presupuesto'}
-          </h1>
-          <p className="text-[#B0B0B0]">
-            {quoteData.quote_number || 'Crear un nuevo presupuesto'}
-          </p>
-        </div>
+        <div className="space-y-6 pb-24">
+          <div className="flex items-center gap-4">
+            <Link to={createPageUrl('Quotes')}>
+              <Button variant="ghost" size="icon" className="shrink-0">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
 
-        <div className="flex gap-2">
-          {quoteId && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleDeleteQuote}
-              disabled={saving}
-              className="border-[#2A2A2A] text-red-400 hover:bg-red-900/20 hover:text-red-400"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          )}
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-[#F5F5F5]">
+                {quoteId ? 'Editar presupuesto' : 'Nuevo presupuesto'}
+              </h1>
+              <p className="text-[#B0B0B0]">
+                {quoteData.quote_number || 'Crear un nuevo presupuesto'}
+              </p>
+            </div>
 
-          <Button
-            onClick={handleExportToCart}
-            disabled={exporting || visibleItems.length === 0}
-            variant="outline"
-            className="border-[#2A2A2A] text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]"
-          >
-            {exporting ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <ShoppingCart className="w-4 h-4 mr-2" />
-            )}
-            Exportar al carrito
-          </Button>
+          <div className="flex items-center gap-2">
+      {quoteId && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleDeleteQuote}
+          disabled={saving}
+          className="h-11 w-11 rounded-xl border-[#2A2A2A] text-red-400 hover:bg-red-900/20 hover:text-red-400 disabled:opacity-60"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      )}
 
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-[#E53935] hover:bg-[#C62828]"
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
-            )}
-            Guardar presupuesto
-          </Button>
-        </div>
-      </div>
+      <Button
+        onClick={handleExportToCart}
+        disabled={exporting || visibleItems.length === 0}
+        className="h-11 px-6 rounded-xl font-medium bg-[#2A2A2A] text-[#F5F5F5] hover:bg-[#3A3A3A] disabled:bg-[#2A2A2A] disabled:text-[#777] disabled:opacity-100 disabled:cursor-not-allowed"
+      >
+        {exporting ? (
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+        ) : (
+          <ShoppingCart className="w-4 h-4 mr-2" />
+        )}
+        Exportar al carrito
+      </Button>
+
+      <Button
+        onClick={handleSave}
+        disabled={saving}
+        className="h-11 px-6 rounded-xl font-medium bg-[#E53935] text-white hover:bg-[#C62828] disabled:bg-[#E53935] disabled:text-white disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {saving ? (
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+        ) : (
+          <Save className="w-4 h-4 mr-2" />
+        )}
+        Guardar presupuesto
+      </Button>
+    </div>
+          </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
@@ -516,7 +524,10 @@ export default function QuoteBuilder() {
                   <Label className="text-[#B0B0B0]">Nombre del cliente *</Label>
                   <Input
                     value={quoteData.customer_name}
-                    onChange={(e) => setQuoteData({ ...quoteData, customer_name: e.target.value })}
+                    onChange={(e) => {
+                      const cleanValue = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s'.-]/g, "");
+                      setQuoteData({ ...quoteData, customer_name: cleanValue });
+                    }}
                     placeholder="Juan Pérez"
                     className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                   />
@@ -575,32 +586,44 @@ export default function QuoteBuilder() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[#B0B0B0]">Número de presupuesto</Label>
-                  <Input
-                    value={quoteData.quote_number}
-                    onChange={(e) => setQuoteData({ ...quoteData, quote_number: e.target.value })}
-                    placeholder="P-000001"
-                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
-                  />
+
+                  {quoteData?.quote_number ? (
+                 <div className="h-10 w-full px-3 flex items-center rounded-md bg-[#2A2A2A] border border-[#2A2A2A] text-[#B0B0B0] opacity-80 cursor-not-allowed select-none">
+                     {quoteData.quote_number}
+                  </div>
+
+                  ) : (
+                    <Input
+                      value=""
+                      disabled
+                      placeholder="Se asigna automáticamente al guardar"
+                      className="bg-[#2A2A2A] border-[#2A2A2A] text-[#B0B0B0] disabled:opacity-100"
+                    />
+                  )}
                 </div>
+
 
                 <div className="space-y-2">
                   <Label className="text-[#B0B0B0]">Estado</Label>
+
                   <Select
-                    value={quoteData.status}
+                    value={quoteData.status || "Draft"}
                     onValueChange={(v) => setQuoteData({ ...quoteData, status: v })}
                   >
-                    <SelectTrigger className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]">
-                      <SelectValue />
+                    <SelectTrigger className="h-10 w-full bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]">
+                      <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
+
                     <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
-                      {STATUSES.map(s => (
+                      {STATUSES.map((s) => (
                         <SelectItem key={s} value={s} className="text-[#F5F5F5] focus:bg-[#2A2A2A]">
-                          {s}
+                          {STATUS_LABELS[s]}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+
 
                 <div className="space-y-2">
                   <Label className="text-[#B0B0B0]">Margen global %</Label>
@@ -611,7 +634,7 @@ export default function QuoteBuilder() {
                     value={quoteData.global_margin_percent}
                     onChange={(e) => setQuoteData({ ...quoteData, global_margin_percent: e.target.value })}
                     placeholder="20"
-                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
+                    className="h-10 w-full bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                   />
                 </div>
               </div>
@@ -627,15 +650,15 @@ export default function QuoteBuilder() {
                   Ítems ({visibleItems.length})
                 </CardTitle>
 
-                <Button
-                  onClick={() => setAddItemOpen(true)}
-                  variant="outline"
-                  size="sm"
-                  className="border-[#2A2A2A] text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Agregar ítem
-                </Button>
+            <Button
+            onClick={() => setAddItemOpen(true)}
+            size="sm"
+            className="bg-[#E53935] text-white hover:bg-[#C62828]"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Agregar ítem
+          </Button>
+
               </div>
             </CardHeader>
 
@@ -644,14 +667,14 @@ export default function QuoteBuilder() {
                 <div className="text-center py-12 border-2 border-dashed border-[#2A2A2A] rounded-xl">
                   <Package className="w-12 h-12 mx-auto mb-3 text-[#2A2A2A]" />
                   <p className="text-[#B0B0B0]">Todavía no hay ítems</p>
-                  <Button
-                    onClick={() => setAddItemOpen(true)}
-                    variant="outline"
-                    className="mt-4 border-[#2A2A2A] text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Agregar primer ítem
-                  </Button>
+              <Button
+                onClick={() => setAddItemOpen(true)}
+                className="mt-4 bg-[#E53935] text-white hover:bg-[#C62828]"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Agregar primer ítem
+              </Button>
+
                 </div>
               ) : (
                 <div className="space-y-3">

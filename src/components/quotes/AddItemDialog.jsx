@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Package, Search } from 'lucide-react';
+import { Package, Search, Plus } from 'lucide-react';
 
 export default function AddItemDialog({ open, onOpenChange, suppliers, products, onAdd }) {
   const [selectedSupplier, setSelectedSupplier] = useState('all');
@@ -98,6 +98,7 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
               </SelectContent>
             </Select>
           </div>
+
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B0B0B0]" />
             <Input
@@ -119,13 +120,13 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
             ) : (
               filteredProducts.map((product) => (
                 <button
+                  type="button"
                   key={product.id}
                   onClick={() => handleProductSelect(product)}
-                  className={`w-full p-4 rounded-xl border text-left transition-all ${
-                    selectedProduct?.id === product.id
+                  className={`w-full p-4 rounded-xl border text-left transition-all ${selectedProduct?.id === product.id
                       ? 'border-[#E53935] bg-[#E53935]/10 ring-2 ring-[#E53935]/20'
                       : 'border-[#2A2A2A] hover:border-[#E53935]/50 bg-[#2A2A2A]'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start gap-3">
                     {product.image_url ? (
@@ -139,6 +140,7 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
                         <Package className="w-6 h-6 text-[#B0B0B0]" />
                       </div>
                     )}
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div>
@@ -149,6 +151,7 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
                             {product.supplier_name}
                           </p>
                         </div>
+
                         <div className="text-right shrink-0">
                           <p className="font-semibold text-[#E53935]">
                             ${product.base_price?.toFixed(2)} {product.currency}
@@ -158,6 +161,7 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
                           </p>
                         </div>
                       </div>
+
                       {product.internal_code && (
                         <p className="text-xs text-[#666] mt-1">
                           SKU: {product.internal_code}
@@ -182,6 +186,7 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
                 {selectedProduct.unit_of_measure}
               </p>
             </div>
+
             <div className="flex items-end gap-4">
               <div className="flex-1 space-y-2">
                 <Label className="text-[#B0B0B0]">Cantidad</Label>
@@ -194,7 +199,12 @@ export default function AddItemDialog({ open, onOpenChange, suppliers, products,
                   className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
                 />
               </div>
-              <Button className="bg-[#E53935] text-white hover:bg-[#C62828]">
+
+              <Button
+                type="button"
+                onClick={handleAdd}
+                className="bg-[#E53935] text-white hover:bg-[#C62828]"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Agregar ítem
               </Button>
