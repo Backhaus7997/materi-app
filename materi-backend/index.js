@@ -38,6 +38,10 @@ function createToken(user) {
   );
 }
 
+function formatQuoteNumber(n) {
+  return `Q-${String(n).padStart(6, "0")}`;
+}
+
 function toPublicUser(user) {
   if (!user) return null;
   return {
@@ -50,6 +54,13 @@ function toPublicUser(user) {
     updatedAt: user.updatedAt,
   };
 }
+
+// ---------- Quote Number (Q-000001, Q-000002, ...) ----------
+// Se genera SIEMPRE en backend (atómico) para evitar duplicados.
+function formatQuoteNumber(n) {
+  return `Q-${String(n).padStart(6, "0")}`;
+}
+
 
 async function authMiddleware(req, res, next) {
   const token = req.cookies?.token;
@@ -699,6 +710,21 @@ app.get("/quotes", async (req, res) => {
   }
 });
 
+// Devuelve y RESERVA el próximo número (Q-000001, Q-000002, ...)
+app.get("/quotes/next-number", async (req, res) => {
+  try {
+    const seq = await prisma.quoteNumberSeq.create({ data: {} });
+    const quote_number = formatQuoteNumber(seq.id);
+
+    res.json({ seqId: seq.id, quote_number });
+  } catch (err) {
+    console.error("Error GET /quotes/next-number", err);
+    res.status(500).json({ error: "Error al generar número de presupuesto" });
+  }
+});
+
+
+
 app.post("/quotes", async (req, res) => {
   try {
     const data = req.body;
@@ -706,21 +732,37 @@ app.post("/quotes", async (req, res) => {
     if (!data.vendor_id) return res.status(400).json({ error: "vendor_id es requerido" });
     if (!data.customer_name) return res.status(400).json({ error: "customer_name es requerido" });
 
-    const quote = await prisma.quote.create({
-      data: {
-        vendorId: data.vendor_id,
-        quote_number: data.quote_number || null,
-        customer_name: data.customer_name,
-        customer_company: data.customer_company || null,
-        customer_email: data.customer_email || null,
-        customer_phone: data.customer_phone || null,
-        status: data.status || "Draft",
-        global_margin_percent: data.global_margin_percent ?? 20,
-        notes: data.notes || null,
-        total_cost: data.total_cost ?? 0,
-        total_sale_price: data.total_sale_price ?? 0,
-        total_profit_amount: data.total_profit_amount ?? 0,
-      },
+    const quote = await prisma.$transaction(async (tx) => {
+      let seqId = data.quote_seq_id;
+
+      // ✅ si no vino reservado, generamos uno (fallback)
+      if (!seqId) {
+        const seq = await tx.quoteNumberSeq.create({ data: {} });
+        seqId = seq.id;
+      } else {
+        // ✅ opcional pero recomendado: verificar que exista ese seqId
+        const exists = await tx.quoteNumberSeq.findUnique({ where: { id: seqId } });
+        if (!exists) throw new Error("quote_seq_id inválido o no reservado");
+      }
+
+      const quote_number = formatQuoteNumber(seqId);
+
+      return await tx.quote.create({
+        data: {
+          vendorId: data.vendor_id,
+          quote_number,
+          customer_name: data.customer_name,
+          customer_company: data.customer_company || null,
+          customer_email: data.customer_email || null,
+          customer_phone: data.customer_phone || null,
+          status: data.status || "Draft",
+          global_margin_percent: data.global_margin_percent ?? 20,
+          notes: data.notes || null,
+          total_cost: data.total_cost ?? 0,
+          total_sale_price: data.total_sale_price ?? 0,
+          total_profit_amount: data.total_profit_amount ?? 0,
+        },
+      });
     });
 
     res.status(201).json(quote);
@@ -729,6 +771,8 @@ app.post("/quotes", async (req, res) => {
     res.status(500).json({ error: "Error al crear presupuesto" });
   }
 });
+
+
 
 app.patch("/quotes/:id", async (req, res) => {
   try {
@@ -740,7 +784,6 @@ app.patch("/quotes/:id", async (req, res) => {
     if (body.customer_company !== undefined) data.customer_company = body.customer_company ?? null;
     if (body.customer_email !== undefined) data.customer_email = body.customer_email ?? null;
     if (body.customer_phone !== undefined) data.customer_phone = body.customer_phone ?? null;
-    if (body.quote_number !== undefined) data.quote_number = body.quote_number ?? null;
     if (body.status !== undefined) data.status = body.status;
     if (body.global_margin_percent !== undefined)
       data.global_margin_percent = Number(body.global_margin_percent) || 0;

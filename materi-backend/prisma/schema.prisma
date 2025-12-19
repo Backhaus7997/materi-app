@@ -103,7 +103,7 @@ model Quote {
   vendorId              String
 
   //  quote_number
-  quote_number          String?
+  quote_number          String? @unique
 
   //  customer_name (required)
   customer_name         String
@@ -140,6 +140,11 @@ model Quote {
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+}
+
+model QuoteNumberSeq{
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
 }
 
 model QuoteLineItem {

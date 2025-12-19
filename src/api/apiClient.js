@@ -132,7 +132,13 @@ const QuoteEntity = {
   async delete(id) {
     return request(`/quotes/${id}`, { method: "DELETE" });
   },
+
+  // ✅ nuevo: pide el próximo número
+  async nextNumber() {
+    return request(`/quotes/next-number`);
+  },
 };
+
 
 // ---------- QUOTE LINE ITEMS ----------
 

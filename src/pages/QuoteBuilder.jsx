@@ -86,6 +86,7 @@ export default function QuoteBuilder() {
   }, [user, navigate]);
 
   const [quoteData, setQuoteData] = useState({
+    quote_seq_id: null,
     quote_number: '',
     customer_name: '',
     customer_company: '',
@@ -169,11 +170,29 @@ export default function QuoteBuilder() {
 
   // Generate quote number for new quotes
   useEffect(() => {
-    if (!quoteId && !quoteData.quote_number) {
-      const timestamp = Date.now().toString().slice(-6);
-      setQuoteData(prev => ({ ...prev, quote_number: `Q-${timestamp}` }));
-    }
-  }, [quoteId, quoteData.quote_number]);
+    const loadNextNumber = async () => {
+      if (quoteId) return;
+      if (quoteData.quote_number) return;
+
+      try {
+        const res = await api.entities.Quote.nextNumber();
+        if (res?.quote_number && res?.seqId) {
+          setQuoteData(prev => ({
+            ...prev,
+            quote_number: res.quote_number,
+            quote_seq_id: res.seqId
+          }));
+        }
+      } catch (e) {
+        console.error("Error obteniendo número de presupuesto:", e);
+      }
+    };
+
+    loadNextNumber();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quoteId]);
+
+
 
   const globalMargin = parseFloat(quoteData.global_margin_percent) || 0;
 
@@ -280,10 +299,12 @@ export default function QuoteBuilder() {
           total_cost: totals.totalCost,
           total_sale_price: totals.totalSale,
           total_profit_amount: totals.totalProfit,
-          // normalizamos un poco el teléfono para evitar caracteres raros
           customer_phone: normalizePhone(quoteData.customer_phone),
           customer_email: quoteData.customer_email?.trim() || '',
         };
+
+
+        if(!quoteId) delete basePayload.quote_number;
 
         let savedQuoteId = quoteId;
 
@@ -291,10 +312,16 @@ export default function QuoteBuilder() {
         if (quoteId) {
           await api.entities.Quote.update(quoteId, basePayload);
         } else {
-          // → si es nuevo
           const created = await api.entities.Quote.create(basePayload);
+        
           savedQuoteId = created.id;
+        
+          // ✅ Mostramos el número real asignado por backend
+          if (created?.quote_number) {
+            setQuoteData(prev => ({ ...prev, quote_number: created.quote_number }));
+          }
         }
+
 
         // ---------- Line items ----------
         for (const item of lineItems) {
@@ -596,7 +623,7 @@ export default function QuoteBuilder() {
                     <Input
                       value=""
                       disabled
-                      placeholder="Se asigna automáticamente al guardar"
+                      placeholder="Se asigna automáticamente"
                       className="bg-[#2A2A2A] border-[#2A2A2A] text-[#B0B0B0] disabled:opacity-100"
                     />
                   )}
