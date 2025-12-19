@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from "@/api/apiClient";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -64,6 +64,7 @@ const normalizePhone = (phone) => {
 };
 
 export default function QuoteBuilder() {
+  const requestedNextNumber = useRef(false);
   const urlParams = new URLSearchParams(window.location.search);
   const quoteId = urlParams.get('id');
   const navigate = useNavigate();
@@ -171,26 +172,37 @@ export default function QuoteBuilder() {
   // Generate quote number for new quotes
   useEffect(() => {
     const loadNextNumber = async () => {
+      // si edito, no pido nada
       if (quoteId) return;
+    
+      // 🔒 candado: evita doble ejecución (StrictMode)
+      if (requestedNextNumberRef.current) return;
+      requestedNextNumberRef.current = true;
+    
+      // si ya lo tenés seteado, no lo pidas
       if (quoteData.quote_number) return;
-
+    
       try {
-        const res = await api.entities.Quote.nextNumber();
+        const res = await api.entities.Quote.nextNumber(); // { seqId, quote_number }
         if (res?.quote_number && res?.seqId) {
           setQuoteData(prev => ({
             ...prev,
             quote_number: res.quote_number,
-            quote_seq_id: res.seqId
+            quote_seq_id: res.seqId,
           }));
         }
       } catch (e) {
         console.error("Error obteniendo número de presupuesto:", e);
+        // si falla, liberamos el candado para que pueda reintentar
+        requestedNextNumberRef.current = false;
       }
     };
-
+  
     loadNextNumber();
+    // NO pongas quoteData en deps, sino se vuelve a disparar
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quoteId]);
+
 
 
 
@@ -637,18 +649,28 @@ export default function QuoteBuilder() {
                     value={quoteData.status || "Draft"}
                     onValueChange={(v) => setQuoteData({ ...quoteData, status: v })}
                   >
-                    <SelectTrigger className="h-10 w-full bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]">
+                    <SelectTrigger className="h-10 w-full bg-[#2A2A2A] border-[#2A2A2A] text-white">
                       <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
 
-                    <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A]">
+                    <SelectContent className="bg-[#1E1E1E] border-[#2A2A2A] p-1">
                       {STATUSES.map((s) => (
-                        <SelectItem key={s} value={s} className="text-[#F5F5F5] focus:bg-[#2A2A2A]">
+                        <SelectItem
+                          key={s}
+                          value={s}
+                          className="
+                            text-white cursor-pointer
+                            focus:bg-[#2A2A2A] focus:text-white
+                            data-[highlighted]:bg-[#2A2A2A] data-[highlighted]:text-white
+                            data-[state=checked]:bg-[#2A2A2A] data-[state=checked]:text-white
+                          "
+                        >
                           {STATUS_LABELS[s]}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+
                 </div>
 
 
