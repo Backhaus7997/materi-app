@@ -154,24 +154,41 @@ export default function VendorCart() {
           <h1 className="text-2xl font-bold text-[#F5F5F5]">Carrito</h1>
           <p className="text-[#B0B0B0] mt-1">Construye tu presupuesto con los productos seleccionados</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Label className="text-sm text-[#B0B0B0] whitespace-nowrap">Margen global:</Label>
-            <div className="flex items-center gap-1">
-              <Input
-                type="number"
-                min="0"
-                step="0.1"
-                value={globalMargin}
-                onChange={(e) => setGlobalMargin(parseFloat(e.target.value) || 0)}
-                className="w-20 bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5]"
-              />
-              <span className="text-[#B0B0B0]">%</span>
-            </div>
+        <div className="flex items-center gap-3 sm:gap-4">
+        {/* ✅ Solo cuando hay items: botón en header derecha */}
+        {cartItems.length > 0 && (
+          <Link to={createPageUrl('VendorProducts')}>
+            <Button
+              className="
+                h-10 rounded-xl
+                bg-[#E53935] text-white
+                hover:bg-[#C62828]
+                disabled:opacity-60
+              "
+            >
+              <Package className="w-4 h-4 mr-2" />
+              Agregar productos
+            </Button>
+          </Link>
+        )}
+
+        <div className="flex items-center gap-2">
+          <Label className="text-sm text-[#B0B0B0] whitespace-nowrap">Margen global:</Label>
+          <div className="flex items-center gap-1">
+            <Input
+              type="number"
+              min="0"
+              step="0.1"
+              value={globalMargin}
+              onChange={(e) => setGlobalMargin(parseFloat(e.target.value) || 0)}
+              className="w-20 bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5]"
+            />
+            <span className="text-[#B0B0B0]">%</span>
           </div>
         </div>
       </div>
-
+    
+    </div>
       {cartItems.length === 0 ? (
         <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
           <CardContent className="py-20 text-center">
