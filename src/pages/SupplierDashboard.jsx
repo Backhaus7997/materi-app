@@ -297,7 +297,7 @@ export default function SupplierDashboard() {
                   <Building2 className="w-5 h-5 text-[#E53935]" />
                   Información del proveedor
                 </CardTitle>
-                <Button variant="outline" size="sm" className="border-[#2A2A2A] text-[#B0B0B0] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]" onClick={() => setSupplierFormOpen(true)}>
+                <Button variant="outline" size="sm" className="border-[#2A2A2A] text-[#99999] hover:bg-[#2A2A2A] hover:text-[#F5F5F5]" onClick={() => setSupplierFormOpen(true)}>
                   <Pencil className="w-4 h-4 mr-2" />
                   Editar
                 </Button>
@@ -375,7 +375,7 @@ export default function SupplierDashboard() {
                 />
               </div>
 
-              <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
+              <Card className="bg-[#1E1E1E] border-[#2A2A2A] overflow-hidden">
                 {productsLoading ? (
                   <div className="flex items-center justify-center py-20">
                     <Loader2 className="w-8 h-8 animate-spin text-[#E53935]" />
@@ -391,19 +391,19 @@ export default function SupplierDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-[#2A2A2A] border-[#2A2A2A]">
-                          <TableHead className="text-[#B0B0B0]">Producto</TableHead>
-                          <TableHead className="hidden md:table-cell text-[#B0B0B0]">Código</TableHead>
-                          <TableHead className="hidden lg:table-cell text-[#B0B0B0]">Categoría</TableHead>
-                          <TableHead className="text-right text-[#B0B0B0]">Precio</TableHead>
-                          <TableHead className="text-[#B0B0B0]">Estado</TableHead>
-                          <TableHead className="w-12"></TableHead>
+                          <TableHead className="text-[#B0B0B0] text-center">Producto</TableHead>
+                          <TableHead className="hidden md:table-cell text-[#B0B0B0] text-center">Código</TableHead>
+                          <TableHead className="hidden lg:table-cell text-[#B0B0B0] text-center">Categoría</TableHead>
+                          <TableHead className="text-[#B0B0B0] text-center">Precio</TableHead>
+                          <TableHead className="text-[#B0B0B0] text-center">Estado</TableHead>
+                          <TableHead className="w-12 text-center"></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredProducts.map((product) => (
                           <TableRow key={product.id} className="border-[#2A2A2A]">
-                            <TableCell>
-                              <div className="flex items-center gap-3">
+                            <TableCell className="align-middle">
+                              <div className="flex items-center justify-center gap-3 ">
                                 {product.image_url ? (
                                   <img
                                     src={product.image_url}
@@ -425,15 +425,15 @@ export default function SupplierDashboard() {
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-[#B0B0B0] font-mono text-sm hidden md:table-cell">
+                            <TableCell className="text-[#B0B0B0] font-mono text-sm hidden md:table-cell text-center align-middle">
                               {product.internal_code || '—'}
                             </TableCell>
-                            <TableCell className="hidden lg:table-cell">
+                            <TableCell className="hidden lg:table-cell text-center align-middle">
                               {product.category ? (
-                                <Badge variant="outline" className="border-[#2A2A2A] text-[#B0B0B0]">{product.category}</Badge>
+                                <Badge variant="outline" className="border-[#2A2A2A] text-[#B0B0B0] mx-auto">{product.category}</Badge>
                               ) : '—'}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-center align-middle">
                               <span className="font-semibold text-[#F5F5F5]">
                                 {product.base_price?.toFixed(2)} {product.currency || 'USD'}
                               </span>
@@ -442,18 +442,18 @@ export default function SupplierDashboard() {
                               </span>
                             </TableCell>
 
-                            <TableCell>
+                            <TableCell className="text-center align-middle">
                               <Badge className={product.active !== false
-                                ? 'bg-emerald-900/30 text-emerald-400'
-                                : 'bg-[#2A2A2A] text-[#B0B0B0]'}>
+                                ? 'bg-emerald-900/30 text-emerald-400 mx-auto'
+                                : 'bg-[#2A2A2A] text-[#B0B0B0] mx-auto'}>
                                 {product.active !== false ? 'Activo' : 'Inactivo'}
                               </Badge>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center align-middle">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="ghost" size="icon" className="h-8 w-8 text-[#B0B0B0] hover:bg-[#2A2A2A]">
-                                    <MoreHorizontal className="w-4 h-4" />
+                                    <MoreHorizontal className="w-4 h-4 text-[#00000] hover:bg-[#99999]" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-[#1E1E1E] border-[#2A2A2A]">
