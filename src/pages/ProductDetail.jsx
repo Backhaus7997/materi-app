@@ -257,10 +257,20 @@ export default function ProductDetail() {
                   Información del proveedor
                 </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
+                 <div>
                     <p className="text-[#B0B0B0]">Empresa</p>
-                    <p className="font-medium text-[#F5F5F5]">{supplierData.name}</p>
+                    <p className="text-lg font-semibold text-[#F5F5F5] leading-tight">
+                      {supplierData.company_name || "—"}
+                    </p>
+
+                    {supplierData.name ? (
+                      <p className="text-xs text-[#B0B0B0] mt-1">
+                        {supplierData.name}
+                      </p>
+                    ) : null}
+
                   </div>
+
                   {supplierData.contact_person && (
                     <div>
                       <p className="text-[#B0B0B0]">Contacto</p>
