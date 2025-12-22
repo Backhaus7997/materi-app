@@ -360,7 +360,7 @@ export default function VendorCart() {
                 </CardContent>
               </Card>
 
-              <Link to={createPageUrl('Quotes')}>
+              <Link to={createPageUrl('Quotes')} className='block mt-4'>
                 <Button className="w-full bg-[#E53935] hover:bg-[#C62828] text-white">
                   Ver todos los presupuestos
                   <ArrowRight className="w-4 h-4 ml-2" />
