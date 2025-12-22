@@ -72,24 +72,25 @@ export default function SupplierForm({ open, onOpenChange, supplier, onSave }) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">
-          <div className="grid grid-cols-2 gap-4">
+         <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 sm:col-span-1 space-y-2">
-              <Label htmlFor="name">Nombre *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Nombre del proveedor"
-                required
-              />
-            </div>
-            <div className="col-span-2 sm:col-span-1 space-y-2">
-              <Label htmlFor="company_name">Nombre de la empresa</Label>
+              <Label htmlFor="company_name">Empresa *</Label>
               <Input
                 id="company_name"
                 value={formData.company_name}
                 onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                placeholder="Razón social"
+                placeholder="Ej: Mercado Libre"
+                required
+              />
+            </div>
+
+            <div className="col-span-2 sm:col-span-1 space-y-2">
+              <Label htmlFor="name">Nombre comercial </Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Ej: ML Proveedor"
               />
             </div>
           </div>
@@ -100,7 +101,7 @@ export default function SupplierForm({ open, onOpenChange, supplier, onSave }) {
               id="contact_person"
               value={formData.contact_person}
               onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
-              placeholder="Contacto principal"
+              placeholder="Ej: Tobias Becerra"
             />
           </div>
 

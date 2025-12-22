@@ -139,7 +139,8 @@ export default function ProductForm({ open, onOpenChange, product, suppliers, on
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5] materi-dialog">
+      <DialogContent  onOpenAutoFocus={(e) => e.preventDefault()}
+      className="max-w-lg max-h-[90vh] overflow-y-auto bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5] materi-dialog">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="w-5 h-5 text-[#E53935]" />
