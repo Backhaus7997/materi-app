@@ -160,7 +160,7 @@ export default function VendorCart() {
           <Link to={createPageUrl('VendorProducts')}>
             <Button
               className="
-                h-10 rounded-xl
+                h-9 rounded-xl
                 bg-[#E53935] text-white
                 hover:bg-[#C62828]
                 disabled:opacity-60
