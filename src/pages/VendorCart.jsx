@@ -21,8 +21,11 @@ import {
 } from 'lucide-react';
 
 export default function VendorCart() {
-  const queryClient = useQueryClient();
-  const [globalMargin, setGlobalMargin] = useState(20);
+  const [globalMarginInput, setGlobalMarginInput] = useState("20");
+  const globalMarginNumber = globalMarginInput === "" ? 0 : Number(globalMarginInput);
+
+  const queryClient = useQueryClient(); // ✅ AGREGAR ESTO
+
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -76,7 +79,7 @@ export default function VendorCart() {
       const qty = parseFloat(item.quantity) || 0;
       const itemMargin = item.margin_percent !== null && item.margin_percent !== undefined
         ? parseFloat(item.margin_percent)
-        : globalMargin;
+        : globalMarginNumber;
 
       const lineCostTotal = unitCost * qty;
       const unitSalePrice = unitCost * (1 + itemMargin / 100);
@@ -102,7 +105,7 @@ export default function VendorCart() {
       subtotalSale,
       totalProfit: subtotalSale - subtotalCost
     };
-  }, [cartItems, globalMargin]);
+  }, [cartItems, globalMarginNumber]);
 
   const ordersBySupplier = useMemo(() => {
     const grouped = {};
@@ -179,15 +182,28 @@ export default function VendorCart() {
               type="number"
               min="0"
               step="0.1"
-              value={globalMargin}
-              onChange={(e) => setGlobalMargin(parseFloat(e.target.value) || 0)}
-              className="w-20 bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5]"
+              value={globalMarginInput}
+              onChange={(e) => {
+                setGlobalMarginInput(e.target.value); // ✅ permite "" sin forzar 0
+              }}
+              onBlur={() => {
+                if (globalMarginInput === "") {
+                  setGlobalMarginInput("20"); // <- si preferís que quede vacío, cambiá a "0" o dejalo ""
+                  return;
+                }
+                let n = Number(globalMarginInput);
+                if (Number.isNaN(n)) n = 20;
+                n = Math.max(0, n);
+                setGlobalMarginInput(String(n));
+              }}
+              className="w-20 bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5] text-left"
             />
+
             <span className="text-[#B0B0B0]">%</span>
           </div>
         </div>
       </div>
-    
+
     </div>
       {cartItems.length === 0 ? (
         <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
@@ -355,7 +371,7 @@ export default function VendorCart() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-[#B0B0B0]">Margen global</span>
-                    <span className="font-medium text-[#F5F5F5]">{globalMargin}%</span>
+                    <span className="font-medium text-[#F5F5F5]">{globalMarginNumber}%</span>
                   </div>
                 </CardContent>
               </Card>
