@@ -10,7 +10,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const app = express();
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, "0.0.0.0", () => console.log("Running on", PORT));
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-super-inseguro";
 const JWT_EXPIRES_IN = "7d";
 
