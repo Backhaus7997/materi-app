@@ -962,7 +962,3 @@ process.on("SIGINT", async () => {
   await prisma.$disconnect();
   process.exit(0);
 });
-
-app.listen(PORT, () => {
-  console.log(`✅ API escuchando en http://localhost:${PORT}`);
-});
