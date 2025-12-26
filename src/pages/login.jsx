@@ -23,7 +23,10 @@ export default function LoginPage() {
       setError("");
       return api.auth.login({ email, password });
     },
-    onSuccess: async (user) => {
+    onSuccess: async (data) => {
+      // El backend devuelve { user: {...} }
+      const user = data.user || data;
+
       // refrescar el currentUser en React Query
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
@@ -36,7 +39,17 @@ export default function LoginPage() {
     },
     onError: (err) => {
       console.error(err);
-      setError("Email o contraseña incorrectos");
+      // Intentar extraer el mensaje de error del servidor
+      let errorMessage = "Email o contraseña incorrectos";
+      try {
+        const errorData = JSON.parse(err.message);
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch (e) {
+        // Si no se puede parsear, usar el mensaje por defecto
+      }
+      setError(errorMessage);
     },
   });
 

@@ -20,7 +20,10 @@ export default function RegisterPage() {
   const registerMutation = useMutation({
     mutationFn: ({ name, email, password, user_role }) =>
       api.auth.register({ name, email, password, user_role }),
-    onSuccess: (user) => {
+    onSuccess: (data) => {
+      // El backend devuelve { user: {...} }
+      const user = data.user || data;
+
       // redirigimos según rol
       if (user.user_role === "Supplier") {
         navigate("/SupplierDashboard");
@@ -30,7 +33,17 @@ export default function RegisterPage() {
     },
     onError: async (err) => {
       console.error("Error al registrar", err);
-      setError("No se pudo crear la cuenta. Revisá los datos e intentá de nuevo.");
+      // Intentar extraer el mensaje de error del servidor
+      let errorMessage = "No se pudo crear la cuenta. Revisá los datos e intentá de nuevo.";
+      try {
+        const errorData = JSON.parse(err.message);
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch (e) {
+        // Si no se puede parsear, usar el mensaje por defecto
+      }
+      setError(errorMessage);
     },
   });
 
