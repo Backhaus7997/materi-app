@@ -7,8 +7,40 @@ const jwt = require("jsonwebtoken");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const validator = require("validator");
+const winston = require("winston");
+const { createId } = require("@paralleldrive/cuid2");
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
+
+// ✅ Configuración de Winston logger
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || "info",
+  format: winston.format.combine(
+    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+    winston.format.errors({ stack: true }),
+    winston.format.splat(),
+    winston.format.json()
+  ),
+  defaultMeta: { service: "materi-backend" },
+  transports: [
+    // Escribir logs de error a archivo
+    new winston.transports.File({ filename: "logs/error.log", level: "error" }),
+    // Escribir todos los logs a archivo combinado
+    new winston.transports.File({ filename: "logs/combined.log" }),
+  ],
+});
+
+// En desarrollo, también mostrar logs en consola con formato más legible
+if (process.env.NODE_ENV !== "production") {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      ),
+    })
+  );
+}
 
 const prisma = new PrismaClient();
 const app = express();
@@ -16,19 +48,19 @@ const app = express();
 // Validar JWT_SECRET en producción
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  console.error("FATAL: JWT_SECRET no está configurado");
+  logger.error("FATAL: JWT_SECRET no está configurado");
   if (process.env.NODE_ENV === "production") {
     process.exit(1);
   }
-  console.warn("Usando JWT_SECRET por defecto (solo desarrollo)");
+  logger.warn("Usando JWT_SECRET por defecto (solo desarrollo)");
 }
 const JWT_EXPIRES_IN = "7d";
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, "0.0.0.0", () => console.log("Running on", PORT));
+app.listen(PORT, "0.0.0.0", () => logger.info(`Server running on port ${PORT}`));
 
 // ---------- Middlewares base ----------
-console.log(">>> BACKEND MATERI - FILE:", __filename);
+logger.info(`Materi Backend initialized - File: ${__filename}`);
 
 // ✅ Helmet para headers de seguridad HTTP
 app.use(helmet());
@@ -127,13 +159,37 @@ async function authMiddleware(req, res, next) {
     });
     req.user = user;
   } catch (err) {
-    console.error("Error verificando token:", err.message);
+    logger.warn("Error verificando token", { error: err.message });
     req.user = null;
   }
   next();
 }
 
 app.use(authMiddleware);
+
+// ---------- HEALTH CHECK ----------
+app.get("/health", async (req, res) => {
+  try {
+    // Verificar conexión a base de datos
+    await prisma.$queryRaw`SELECT 1`;
+
+    res.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: "connected",
+      environment: process.env.NODE_ENV || "development",
+    });
+  } catch (err) {
+    logger.error("Health check failed", { error: err.message, stack: err.stack });
+    res.status(503).json({
+      status: "unhealthy",
+      timestamp: new Date().toISOString(),
+      database: "disconnected",
+      error: err.message,
+    });
+  }
+});
 
 app.patch("/auth/me", async (req, res) => {
   try {
@@ -203,6 +259,7 @@ app.post("/auth/register", authLimiter, async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
+        id: createId(),
         name: validator.trim(name),
         email: normalizedEmail,
         passwordHash,
@@ -279,7 +336,7 @@ app.post("/auth/login", authLimiter, async (req, res) => {
 
 app.get("/suppliers", async (req, res) => {
   try {
-    const { active, id } = req.query;
+    const { active, id, page, limit } = req.query;
     const where = {};
 
     if (active !== undefined) {
@@ -288,14 +345,32 @@ app.get("/suppliers", async (req, res) => {
 
     if (id) where.id = id;
 
-    const suppliers = await prisma.supplier.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-    });
+    // Paginación
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 50;
+    const skip = (pageNum - 1) * limitNum;
 
-    res.json(suppliers);
+    const [suppliers, total] = await Promise.all([
+      prisma.supplier.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limitNum,
+      }),
+      prisma.supplier.count({ where }),
+    ]);
+
+    res.json({
+      data: suppliers,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
   } catch (err) {
-    console.error("Error GET /suppliers", err);
+    logger.error("Error GET /suppliers", { error: err.message, stack: err.stack });
     res.status(500).json({ error: "Error al obtener proveedores" });
   }
 });
@@ -361,7 +436,7 @@ app.delete("/suppliers/:id", async (req, res) => {
 
 app.get("/products", async (req, res) => {
   try {
-    const { supplier_id, active, search, category, id } = req.query;
+    const { supplier_id, active, search, category, id, page, limit } = req.query;
     const where = {};
 
     if (id) where.id = id;
@@ -380,14 +455,32 @@ app.get("/products", async (req, res) => {
       ];
     }
 
-    const products = await prisma.product.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-    });
+    // Paginación
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 50;
+    const skip = (pageNum - 1) * limitNum;
 
-    res.json(products);
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limitNum,
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    res.json({
+      data: products,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
   } catch (err) {
-    console.error("Error GET /products", err);
+    logger.error("Error GET /products", { error: err.message, stack: err.stack });
     res.status(500).json({ error: "Error al obtener productos" });
   }
 });
@@ -751,20 +844,38 @@ app.delete("/cart-items/:id", async (req, res) => {
 
 app.get("/quotes", async (req, res) => {
   try {
-    const { vendor_id, id } = req.query;
+    const { vendor_id, id, page, limit } = req.query;
     const where = {};
 
     if (id) where.id = id;
     if (vendor_id) where.vendorId = vendor_id;
 
-    const quotes = await prisma.quote.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-    });
+    // Paginación
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 50;
+    const skip = (pageNum - 1) * limitNum;
 
-    res.json(quotes);
+    const [quotes, total] = await Promise.all([
+      prisma.quote.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limitNum,
+      }),
+      prisma.quote.count({ where }),
+    ]);
+
+    res.json({
+      data: quotes,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
   } catch (err) {
-    console.error("Error GET /quotes", err);
+    logger.error("Error GET /quotes", { error: err.message, stack: err.stack });
     res.status(500).json({ error: "Error al obtener presupuestos" });
   }
 });
@@ -1014,9 +1125,26 @@ app.delete("/quote-line-items/:id", async (req, res) => {
   }
 });
 
+// ---------- Centralized Error Handler ----------
+app.use((err, req, res, next) => {
+  logger.error("Unhandled error", {
+    error: err.message,
+    stack: err.stack,
+    method: req.method,
+    path: req.path,
+    body: req.body,
+  });
+
+  res.status(err.status || 500).json({
+    error: err.message || "Error interno del servidor",
+    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+  });
+});
+
 // ---------- Shutdown ordenado ----------
 
 process.on("SIGINT", async () => {
+  logger.info("Shutting down gracefully...");
   await prisma.$disconnect();
   process.exit(0);
 });

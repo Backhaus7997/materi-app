@@ -165,7 +165,7 @@ export default function VendorDashboard() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-[#F5F5F5]">Explorar productos</h3>
-                    <p className="text-sm text-[#B0B0B0]">Explora todos los productos</p>
+                    <p className="text-sm text-[#B0B0B0]">Explora todos los productos disponibles</p>
                   </div>
                 </div>
                 <ArrowRight className="w-5 h-5 text-[#B0B0B0] group-hover:text-[#E53935] transition-colors" />
