@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -15,7 +16,6 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("Vendor"); // Vendor por defecto
-  const [error, setError] = useState("");
 
   const registerMutation = useMutation({
     mutationFn: ({ name, email, password, user_role }) =>
@@ -23,6 +23,10 @@ export default function RegisterPage() {
     onSuccess: (data) => {
       // El backend devuelve { user: {...} }
       const user = data.user || data;
+
+      toast.success("Cuenta creada exitosamente", {
+        description: `Bienvenido/a, ${user.name}!`
+      });
 
       // redirigimos según rol
       if (user.user_role === "Supplier") {
@@ -43,16 +47,19 @@ export default function RegisterPage() {
       } catch (e) {
         // Si no se puede parsear, usar el mensaje por defecto
       }
-      setError(errorMessage);
+      toast.error("Error al crear cuenta", {
+        description: errorMessage
+      });
     },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError("");
 
     if (!name || !email || !password) {
-      setError("Todos los campos son obligatorios.");
+      toast.error("Campos incompletos", {
+        description: "Todos los campos son obligatorios."
+      });
       return;
     }
 
@@ -77,12 +84,6 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="text-sm text-red-400 bg-red-900/20 border border-red-900/40 rounded px-3 py-2">
-                {error}
-              </div>
-            )}
-
             <div className="space-y-1">
               <Label htmlFor="name" className="text-[#F5F5F5]">
                 Nombre

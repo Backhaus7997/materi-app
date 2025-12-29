@@ -8,24 +8,27 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   // 👇 ahora empiezan vacíos
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }) => {
-      setError("");
       return api.auth.login({ email, password });
     },
     onSuccess: async (data) => {
       // El backend devuelve { user: {...} }
       const user = data.user || data;
+
+      toast.success("Sesión iniciada", {
+        description: `Bienvenido/a de nuevo, ${user.name}!`
+      });
 
       // refrescar el currentUser en React Query
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
@@ -49,7 +52,9 @@ export default function LoginPage() {
       } catch (e) {
         // Si no se puede parsear, usar el mensaje por defecto
       }
-      setError(errorMessage);
+      toast.error("Error al iniciar sesión", {
+        description: errorMessage
+      });
     },
   });
 
@@ -97,10 +102,6 @@ export default function LoginPage() {
                 placeholder="••••••••"
               />
             </div>
-
-            {error && (
-              <p className="text-sm text-red-400 text-center">{error}</p>
-            )}
 
             <Button
               type="submit"

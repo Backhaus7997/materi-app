@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "@/api/apiClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 import {
   Package,
@@ -42,15 +42,6 @@ export default function ProductDetail() {
   });
 
   const product = products[0];
-  const { toast } = useToast();
-  const lastToastId = useRef(undefined);
-
-  const showToast = (opts) => {
-  if (lastToastId.current) toast.dismiss(lastToastId.current);
-
-  const t = toast({ duration: 2000, ...opts });
-  lastToastId.current = t.id;
-};
 
   const { data: supplier } = useQuery({
     queryKey: ['supplier', product?.supplier_id],
@@ -137,16 +128,13 @@ export default function ProductDetail() {
       
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["cartItems"] });
-        showToast({
-          title: "Producto agregado",
-          description: "El producto se agregó correctamente al carrito.",
+        toast.success("Producto agregado al carrito", {
+          description: `${quantity} ${product.unit_of_measure || 'unidad'}(es) agregada(s).`
         });
       },
       onError: (error) => {
-        showToast({
-          title: "Error",
-          description: error?.message || "Error al agregar producto",
-          variant: "destructive",
+        toast.error("Error al agregar producto", {
+          description: error?.message || "No se pudo agregar el producto al carrito."
         });
       },
   });

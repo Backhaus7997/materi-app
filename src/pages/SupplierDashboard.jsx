@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -71,7 +72,9 @@ const validateSupplierBeforeSave = (data) => {
   }
 
   if (errors.length) {
-    alert("No se puede guardar el proveedor:\n\n" + errors.join("\n"));
+    toast.error("No se puede guardar el proveedor", {
+      description: errors.join("\n")
+    });
     return false;
   }
 
@@ -123,17 +126,35 @@ export default function SupplierDashboard() {
       return supplier;
     },
     onSuccess: () => {
+      toast.success("Proveedor creado exitosamente", {
+        description: "Tu perfil de proveedor ha sido configurado."
+      });
       queryClient.invalidateQueries({ queryKey: ['mySupplier'] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       setSupplierFormOpen(false);
+    },
+    onError: (error) => {
+      console.error('Failed to create supplier:', error);
+      toast.error("Error al crear proveedor", {
+        description: "No se pudo crear el proveedor. Intentá de nuevo."
+      });
     }
   });
 
   const updateSupplierMutation = useMutation({
     mutationFn: ({ id, data }) => api.entities.Supplier.update(id, data),
     onSuccess: () => {
+      toast.success("Proveedor actualizado", {
+        description: "Los cambios se guardaron correctamente."
+      });
       queryClient.invalidateQueries({ queryKey: ['mySupplier'] });
       setSupplierFormOpen(false);
+    },
+    onError: (error) => {
+      console.error('Failed to update supplier:', error);
+      toast.error("Error al actualizar proveedor", {
+        description: "No se pudieron guardar los cambios."
+      });
     }
   });
 
@@ -144,21 +165,36 @@ export default function SupplierDashboard() {
       supplier_name: supplierData?.name || ''
     }),
     onSuccess: () => {
+      toast.success("Producto creado", {
+        description: "El producto se agregó al catálogo."
+      });
       queryClient.invalidateQueries({ queryKey: ['supplierProducts'] });
       setProductFormOpen(false);
       setSelectedProduct(null);
     },
     onError: (error) => {
       console.error('Failed to create product:', error);
+      toast.error("Error al crear producto", {
+        description: "No se pudo crear el producto. Intentá de nuevo."
+      });
     }
   });
 
   const updateProductMutation = useMutation({
     mutationFn: ({ id, data }) => api.entities.Product.update(id, data),
     onSuccess: () => {
+      toast.success("Producto actualizado", {
+        description: "Los cambios se guardaron correctamente."
+      });
       queryClient.invalidateQueries({ queryKey: ['supplierProducts'] });
       setProductFormOpen(false);
       setSelectedProduct(null);
+    },
+    onError: (error) => {
+      console.error('Failed to update product:', error);
+      toast.error("Error al actualizar producto", {
+        description: "No se pudieron guardar los cambios."
+      });
     }
   });
 
@@ -166,11 +202,17 @@ export default function SupplierDashboard() {
   const logoutMutation = useMutation({
     mutationFn: () => api.auth.logout(),
     onSuccess: async () => {
+      toast.success("Sesión cerrada", {
+        description: "Hasta pronto!"
+      });
       await queryClient.clear();
       navigate('/login');
     },
     onError: async (err) => {
       console.error('Error al cerrar sesión (supplier)', err);
+      toast.error("Error al cerrar sesión", {
+        description: "Hubo un problema. Volvé a intentarlo."
+      });
       await queryClient.clear();
       navigate('/login');
     },

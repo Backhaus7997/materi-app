@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 import { 
   ShoppingCart, 
   Loader2, 
@@ -47,13 +48,26 @@ export default function VendorCart() {
     mutationFn: ({ id, data }) => api.entities.CartItem.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
+    },
+    onError: (error) => {
+      console.error('Failed to update cart item:', error);
+      toast.error("Error al actualizar item", {
+        description: "No se pudieron guardar los cambios."
+      });
     }
   });
 
   const deleteItemMutation = useMutation({
     mutationFn: (id) => api.entities.CartItem.delete(id),
     onSuccess: () => {
+      toast.success("Producto eliminado del carrito");
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
+    },
+    onError: (error) => {
+      console.error('Failed to delete cart item:', error);
+      toast.error("Error al eliminar producto", {
+        description: "No se pudo eliminar el producto del carrito."
+      });
     }
   });
   const handleQuantityChange = (item, newQuantity) => {
