@@ -381,6 +381,7 @@ app.post("/suppliers", async (req, res) => {
 
     const supplier = await prisma.supplier.create({
       data: {
+        id: createId(),
         name: data.name,
         company_name: data.company_name || null,
         contact_person: data.contact_person || null,
@@ -519,6 +520,7 @@ app.post("/products", async (req, res) => {
 
     const product = await prisma.product.create({
       data: {
+        id: createId(),
         supplierId: data.supplier_id,
         supplier_name: data.supplier_name || null,
         name: data.name,
@@ -649,6 +651,7 @@ app.post("/carts", async (req, res) => {
 
     const cart = await prisma.cart.create({
       data: {
+        id: createId(),
         vendorId: data.vendor_id,
         global_margin_percent:
           data.global_margin_percent !== undefined && data.global_margin_percent !== null
@@ -746,6 +749,7 @@ app.post('/cart-items', async (req, res) => {
 
     const item = await prisma.cartItem.create({
       data: {
+        id: createId(),
         cartId,
         productId,
 
@@ -919,6 +923,7 @@ app.post("/quotes", async (req, res) => {
 
       return await tx.quote.create({
         data: {
+          id: createId(),
           vendorId: data.vendor_id,
           quote_number,
           customer_name: data.customer_name,
@@ -1030,6 +1035,7 @@ app.post("/quote-line-items", async (req, res) => {
 
     const item = await prisma.quoteLineItem.create({
       data: {
+        id: createId(),
         quoteId: data.quote_id,
         supplierId: data.supplier_id || null,
         supplier_name: data.supplier_name || null,
