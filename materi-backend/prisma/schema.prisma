@@ -8,42 +8,40 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  passwordHash String
-  user_role    String
-  supplierId   String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  carts        Cart[]
-  cartItems    CartItem[]
-  quotes       Quote[]
-  supplier     Supplier?  @relation(fields: [supplierId], references: [id])
+model Cart {
+  id                    String     @id
+  vendorId              String
+  global_margin_percent Float      @default(20)
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime
+  User                  User       @relation(fields: [vendorId], references: [id])
+  CartItem              CartItem[]
 }
 
-model Supplier {
-  id             String          @id @default(cuid())
-  name           String
-  company_name   String?
-  contact_person String?
-  email          String?
-  phone          String?
-  address        String?
-  notes          String?
-  payment_terms  String?
-  active         Boolean         @default(true)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  cartItems      CartItem[]
-  products       Product[]
-  quoteLineItems QuoteLineItem[]
-  users          User[]
+model CartItem {
+  id                  String    @id
+  cartId              String
+  vendorId            String?
+  supplierId          String?
+  supplier_name       String?
+  productId           String
+  product_name        String?
+  product_description String?
+  product_image_url   String?
+  unit_of_measure     String?
+  quantity            Float     @default(1)
+  unit_cost_price     Float
+  margin_percent      Float?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime
+  Cart                Cart      @relation(fields: [cartId], references: [id])
+  Product             Product   @relation(fields: [productId], references: [id])
+  Supplier            Supplier? @relation(fields: [supplierId], references: [id])
+  User                User?     @relation(fields: [vendorId], references: [id])
 }
 
 model Product {
-  id              String          @id @default(cuid())
+  id              String          @id
   supplierId      String
   supplier_name   String?
   name            String
@@ -56,14 +54,14 @@ model Product {
   currency        String          @default("USD")
   active          Boolean         @default(true)
   createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  cartItems       CartItem[]
-  supplier        Supplier        @relation(fields: [supplierId], references: [id])
-  quoteLineItems  QuoteLineItem[]
+  updatedAt       DateTime
+  CartItem        CartItem[]
+  Supplier        Supplier        @relation(fields: [supplierId], references: [id])
+  QuoteLineItem   QuoteLineItem[]
 }
 
 model Quote {
-  id                    String          @id @default(cuid())
+  id                    String          @id
   vendorId              String
   quote_number          String?         @unique
   customer_name         String
@@ -77,18 +75,13 @@ model Quote {
   total_profit_amount   Float           @default(0)
   notes                 String?
   createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
-  vendor                User            @relation(fields: [vendorId], references: [id])
-  lineItems             QuoteLineItem[]
-}
-
-model QuoteNumberSeq {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
+  updatedAt             DateTime
+  User                  User            @relation(fields: [vendorId], references: [id])
+  QuoteLineItem         QuoteLineItem[]
 }
 
 model QuoteLineItem {
-  id                           String    @id @default(cuid())
+  id                           String    @id
   quoteId                      String
   supplierId                   String?
   supplier_name                String?
@@ -104,40 +97,47 @@ model QuoteLineItem {
   line_sale_total              Float?    @default(0)
   line_profit_amount           Float?    @default(0)
   createdAt                    DateTime  @default(now())
-  updatedAt                    DateTime  @updatedAt
-  product                      Product   @relation(fields: [productId], references: [id])
-  quote                        Quote     @relation(fields: [quoteId], references: [id])
-  supplier                     Supplier? @relation(fields: [supplierId], references: [id])
+  updatedAt                    DateTime
+  Product                      Product   @relation(fields: [productId], references: [id])
+  Quote                        Quote     @relation(fields: [quoteId], references: [id])
+  Supplier                     Supplier? @relation(fields: [supplierId], references: [id])
 }
 
-model Cart {
-  id                    String     @id @default(cuid())
-  vendorId              String
-  global_margin_percent Float      @default(20)
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
-  vendor                User       @relation(fields: [vendorId], references: [id])
-  items                 CartItem[]
+model QuoteNumberSeq {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
 }
 
-model CartItem {
-  id                  String    @id @default(cuid())
-  cartId              String
-  vendorId            String?
-  supplierId          String?
-  supplier_name       String?
-  productId           String
-  product_name        String?
-  product_description String?
-  product_image_url   String?
-  unit_of_measure     String?
-  quantity            Float     @default(1)
-  unit_cost_price     Float
-  margin_percent      Float?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  cart                Cart      @relation(fields: [cartId], references: [id])
-  product             Product   @relation(fields: [productId], references: [id])
-  supplier            Supplier? @relation(fields: [supplierId], references: [id])
-  vendor              User?     @relation(fields: [vendorId], references: [id])
+model Supplier {
+  id             String          @id
+  name           String
+  company_name   String?
+  contact_person String?
+  email          String?
+  phone          String?
+  address        String?
+  notes          String?
+  payment_terms  String?
+  active         Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime
+  CartItem       CartItem[]
+  Product        Product[]
+  QuoteLineItem  QuoteLineItem[]
+  User           User[]
+}
+
+model User {
+  id           String     @id
+  name         String
+  email        String     @unique
+  passwordHash String
+  user_role    String
+  supplierId   String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime
+  Cart         Cart[]
+  CartItem     CartItem[]
+  Quote        Quote[]
+  Supplier     Supplier?  @relation(fields: [supplierId], references: [id])
 }

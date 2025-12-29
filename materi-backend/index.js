@@ -4,20 +4,51 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const validator = require("validator");
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const app = express();
 
+// Validar JWT_SECRET en producción
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET no está configurado");
+  if (process.env.NODE_ENV === "production") {
+    process.exit(1);
+  }
+  console.warn("Usando JWT_SECRET por defecto (solo desarrollo)");
+}
+const JWT_EXPIRES_IN = "7d";
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, "0.0.0.0", () => console.log("Running on", PORT));
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-super-inseguro";
-const JWT_EXPIRES_IN = "7d";
 
 // ---------- Middlewares base ----------
 console.log(">>> BACKEND MATERI - FILE:", __filename);
+
+// ✅ Helmet para headers de seguridad HTTP
+app.use(helmet());
+
+// ✅ Rate limiting para protección contra ataques
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // 5 intentos por IP
+  message: { error: "Demasiados intentos. Por favor, intenta de nuevo en 15 minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const generalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 100, // 100 requests por minuto
+  message: { error: "Demasiadas peticiones. Por favor, intenta de nuevo más tarde." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -41,6 +72,9 @@ app.use(cors(corsOptions));
 
 // ✅ Preflight único (usa exactamente las mismas opciones)
 app.options("*", cors(corsOptions));
+
+// ✅ Rate limiting general
+app.use(generalLimiter);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
@@ -135,16 +169,30 @@ app.post("/auth/logout", (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/auth/register", async (req, res) => {
+app.post("/auth/register", authLimiter, async (req, res) => {
   try {
     const { name, email, password, user_role, supplier_id } = req.body;
 
+    // Validaciones básicas
     if (!name || !email || !password) {
       return res.status(400).json({ error: "name, email y password son requeridos" });
     }
 
+    // Validar formato de email
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: "El formato del email no es válido" });
+    }
+
+    // Validar longitud mínima de password
+    if (password.length < 6) {
+      return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
+    }
+
+    // Normalizar email (lowercase y trim)
+    const normalizedEmail = validator.normalizeEmail(email);
+
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
@@ -155,8 +203,8 @@ app.post("/auth/register", async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        name: validator.trim(name),
+        email: normalizedEmail,
         passwordHash,
         user_role: user_role || "vendor",
         supplierId: supplier_id || null,
@@ -180,7 +228,7 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
-app.post("/auth/login", async (req, res) => {
+app.post("/auth/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -188,8 +236,16 @@ app.post("/auth/login", async (req, res) => {
       return res.status(400).json({ error: "email y password son requeridos" });
     }
 
+    // Validar formato de email
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: "El formato del email no es válido" });
+    }
+
+    // Normalizar email para búsqueda consistente
+    const normalizedEmail = validator.normalizeEmail(email);
+
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (!user) {
