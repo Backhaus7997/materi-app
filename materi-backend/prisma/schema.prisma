@@ -13,7 +13,7 @@ model Cart {
   vendorId              String
   global_margin_percent Float      @default(20)
   createdAt             DateTime   @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime   @updatedAt
   User                  User       @relation(fields: [vendorId], references: [id])
   CartItem              CartItem[]
 }
@@ -33,7 +33,7 @@ model CartItem {
   unit_cost_price     Float
   margin_percent      Float?
   createdAt           DateTime  @default(now())
-  updatedAt           DateTime
+  updatedAt           DateTime  @updatedAt
   Cart                Cart      @relation(fields: [cartId], references: [id])
   Product             Product   @relation(fields: [productId], references: [id])
   Supplier            Supplier? @relation(fields: [supplierId], references: [id])
@@ -54,7 +54,7 @@ model Product {
   currency        String          @default("USD")
   active          Boolean         @default(true)
   createdAt       DateTime        @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime        @updatedAt
   CartItem        CartItem[]
   Supplier        Supplier        @relation(fields: [supplierId], references: [id])
   QuoteLineItem   QuoteLineItem[]
@@ -75,7 +75,7 @@ model Quote {
   total_profit_amount   Float           @default(0)
   notes                 String?
   createdAt             DateTime        @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime        @updatedAt
   User                  User            @relation(fields: [vendorId], references: [id])
   QuoteLineItem         QuoteLineItem[]
 }
@@ -97,7 +97,7 @@ model QuoteLineItem {
   line_sale_total              Float?    @default(0)
   line_profit_amount           Float?    @default(0)
   createdAt                    DateTime  @default(now())
-  updatedAt                    DateTime
+  updatedAt                    DateTime  @updatedAt
   Product                      Product   @relation(fields: [productId], references: [id])
   Quote                        Quote     @relation(fields: [quoteId], references: [id])
   Supplier                     Supplier? @relation(fields: [supplierId], references: [id])
@@ -120,7 +120,7 @@ model Supplier {
   payment_terms  String?
   active         Boolean         @default(true)
   createdAt      DateTime        @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime        @updatedAt
   CartItem       CartItem[]
   Product        Product[]
   QuoteLineItem  QuoteLineItem[]
