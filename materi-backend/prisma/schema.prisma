@@ -16,6 +16,8 @@ model Cart {
   updatedAt             DateTime   @updatedAt
   User                  User       @relation(fields: [vendorId], references: [id])
   CartItem              CartItem[]
+
+  @@index([vendorId])
 }
 
 model CartItem {
@@ -38,6 +40,11 @@ model CartItem {
   Product             Product   @relation(fields: [productId], references: [id])
   Supplier            Supplier? @relation(fields: [supplierId], references: [id])
   User                User?     @relation(fields: [vendorId], references: [id])
+
+  @@index([vendorId])
+  @@index([cartId])
+  @@index([productId])
+  @@index([supplierId])
 }
 
 model Product {
@@ -58,6 +65,10 @@ model Product {
   CartItem        CartItem[]
   Supplier        Supplier        @relation(fields: [supplierId], references: [id])
   QuoteLineItem   QuoteLineItem[]
+
+  @@index([supplierId])
+  @@index([active])
+  @@index([category])
 }
 
 model Quote {
@@ -78,6 +89,10 @@ model Quote {
   updatedAt             DateTime        @updatedAt
   User                  User            @relation(fields: [vendorId], references: [id])
   QuoteLineItem         QuoteLineItem[]
+
+  @@index([vendorId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model QuoteLineItem {
@@ -101,6 +116,10 @@ model QuoteLineItem {
   Product                      Product   @relation(fields: [productId], references: [id])
   Quote                        Quote     @relation(fields: [quoteId], references: [id])
   Supplier                     Supplier? @relation(fields: [supplierId], references: [id])
+
+  @@index([quoteId])
+  @@index([productId])
+  @@index([supplierId])
 }
 
 model QuoteNumberSeq {
@@ -125,6 +144,8 @@ model Supplier {
   Product        Product[]
   QuoteLineItem  QuoteLineItem[]
   User           User[]
+
+  @@index([active])
 }
 
 model User {
@@ -140,4 +161,7 @@ model User {
   CartItem     CartItem[]
   Quote        Quote[]
   Supplier     Supplier?  @relation(fields: [supplierId], references: [id])
+
+  @@index([user_role])
+  @@index([supplierId])
 }

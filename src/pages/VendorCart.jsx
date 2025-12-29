@@ -7,6 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { 
   ShoppingCart, 
@@ -24,6 +34,8 @@ import {
 export default function VendorCart() {
   const [globalMarginInput, setGlobalMarginInput] = useState("20");
   const globalMarginNumber = globalMarginInput === "" ? 0 : Number(globalMarginInput);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   const queryClient = useQueryClient(); // ✅ AGREGAR ESTO
 
@@ -80,8 +92,17 @@ export default function VendorCart() {
     updateItemMutation.mutate({ id: item.id, data: { margin_percent: margin } });
   };
 
-  const handleDeleteItem = (itemId) => {
-    deleteItemMutation.mutate(itemId);
+  const handleDeleteItem = (item) => {
+    setItemToDelete(item);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      deleteItemMutation.mutate(itemToDelete.id);
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
   };
 
   const calculations = useMemo(() => {
@@ -283,7 +304,7 @@ export default function VendorCart() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A] self-end"
-                        onClick={() => handleDeleteItem(item.id)}
+                        onClick={() => handleDeleteItem(item)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -445,6 +466,36 @@ export default function VendorCart() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-[#1E1E1E] border-[#2A2A2A]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#F5F5F5]">
+              ¿Eliminar producto del carrito?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#B0B0B0]">
+              {itemToDelete && (
+                <>
+                  Estás por eliminar <span className="font-semibold text-[#F5F5F5]">{itemToDelete.product_name}</span> del carrito.
+                  Esta acción no se puede deshacer.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-[#2A2A2A] text-[#F5F5F5] hover:bg-[#3A3A3A] border-[#2A2A2A]">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-[#E53935] text-white hover:bg-[#C62828]"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

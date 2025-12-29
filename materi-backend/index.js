@@ -8,6 +8,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const validator = require("validator");
 const winston = require("winston");
+const compression = require("compression");
 const { createId } = require("@paralleldrive/cuid2");
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
@@ -107,6 +108,9 @@ app.options("*", cors(corsOptions));
 
 // ✅ Rate limiting general
 app.use(generalLimiter);
+
+// ✅ Compression middleware - comprime respuestas HTTP
+app.use(compression());
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
