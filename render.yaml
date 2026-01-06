@@ -5,8 +5,8 @@ services:
     region: oregon
     plan: free
     rootDir: materi-backend
-    buildCommand: npm install && npx prisma generate
-    startCommand: node index.js
+    buildCommand: npm ci && npx prisma generate
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -20,3 +20,7 @@ services:
         value: 7d
       - key: LOG_LEVEL
         value: info
+      - key: PORT
+        value: 4000
+      - key: CORS_ORIGIN
+        value: https://materi-app-eight.vercel.app
