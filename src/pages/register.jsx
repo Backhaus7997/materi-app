@@ -22,6 +22,9 @@ export default function RegisterPage() {
     mutationFn: ({ name, email, password, user_role }) =>
       api.auth.register({ name, email, password, user_role }),
     onSuccess: (data) => {
+      // Cerrar toast de loading
+      toast.dismiss("register-loading");
+
       // El backend devuelve { user: {...} }
       const user = data.user || data;
 
@@ -37,6 +40,9 @@ export default function RegisterPage() {
       }
     },
     onError: async (err) => {
+      // Cerrar toast de loading
+      toast.dismiss("register-loading");
+
       console.error("Error al registrar", err);
       // Intentar extraer el mensaje de error del servidor
       let errorMessage = "No se pudo crear la cuenta. Revisá los datos e intentá de nuevo.";
@@ -63,6 +69,11 @@ export default function RegisterPage() {
       });
       return;
     }
+
+    toast.loading("Creando tu cuenta...", {
+      description: "Esto puede tardar un minuto la primera vez.",
+      id: "register-loading"
+    });
 
     registerMutation.mutate({
       name,

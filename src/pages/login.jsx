@@ -24,6 +24,9 @@ export default function LoginPage() {
       return api.auth.login({ email, password });
     },
     onSuccess: async (data) => {
+      // Cerrar toast de loading
+      toast.dismiss("login-loading");
+
       // El backend devuelve { user: {...} }
       const user = data.user || data;
 
@@ -42,6 +45,9 @@ export default function LoginPage() {
       }
     },
     onError: (err) => {
+      // Cerrar toast de loading
+      toast.dismiss("login-loading");
+
       console.error(err);
       // Intentar extraer el mensaje de error del servidor
       let errorMessage = "Email o contraseña incorrectos";
@@ -61,6 +67,12 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    toast.loading("Iniciando sesión...", {
+      description: "Esto puede tardar un minuto la primera vez.",
+      id: "login-loading"
+    });
+
     loginMutation.mutate({ email, password });
   };
 
