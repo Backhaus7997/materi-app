@@ -16,6 +16,7 @@ import LoginPage from "./login";      // página de login
 import RegisterPage from "./register"; // página de registro
 import ForgotPasswordPage from "./ForgotPassword"; // página de recuperación de contraseña
 import ResetPasswordPage from "./ResetPassword"; // página de restablecer contraseña
+import RoleSelectionInitial from "./RoleSelectionInitial"; // página inicial de selección de rol
 
 const PAGES = {
   Quotes,
@@ -48,11 +49,11 @@ function PagesContent() {
   const location = useLocation();
   const path = location.pathname.toLowerCase();
 
-  // 👇 Auth sin Layout: "/" también muestra el login
+  // 👇 Auth sin Layout: "/" muestra selección de roles
   if (path === "/" || path.startsWith("/login") || path.startsWith("/register") || path.startsWith("/forgot-password") || path.startsWith("/reset-password")) {
     return (
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/" element={<RoleSelectionInitial />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

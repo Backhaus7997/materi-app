@@ -12,10 +12,13 @@ import { toast } from "sonner";
 export default function RegisterPage() {
   const navigate = useNavigate();
 
+  // Obtener el rol seleccionado
+  const selectedRole = localStorage.getItem('selectedRole') || 'Vendor';
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("Vendor"); // Vendor por defecto
+  const [role, setRole] = useState(selectedRole);
   const [showPassword, setShowPassword] = useState(false);
 
   const registerMutation = useMutation({
@@ -86,13 +89,25 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4">
       <Card className="w-full max-w-md bg-[#1E1E1E] border-[#2A2A2A]">
-        <CardHeader>
+        <CardHeader className="space-y-4">
+          {/* Logo de Materi */}
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E53935] to-[#C62828] flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-3xl">M</span>
+            </div>
+          </div>
           <CardTitle className="text-[#F5F5F5] text-2xl text-center">
-            Crear cuenta en Materi
+            Materi
           </CardTitle>
-          <CardDescription className="text-[#B0B0B0] text-center">
-            Registrate como vendedor o proveedor para empezar a usar la plataforma.
-          </CardDescription>
+          <p className="text-center text-sm text-[#B0B0B0]">
+            Crear cuenta como <span className="text-[#E53935] font-semibold">{selectedRole === 'Supplier' ? 'Proveedor' : 'Vendedor'}</span>
+          </p>
+          <Link
+            to="/"
+            className="text-xs text-[#666] hover:text-[#E53935] transition-colors text-center block"
+          >
+            Cambiar tipo de cuenta
+          </Link>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -148,21 +163,6 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="role" className="text-[#F5F5F5]">
-                Tipo de cuenta
-              </Label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full rounded-md border border-[#2A2A2A] bg-[#121212] text-[#F5F5F5] px-3 py-2 text-sm"
-              >
-                <option value="Vendor">Vendedor</option>
-                <option value="Supplier">Proveedor</option>
-              </select>
             </div>
 
             <Button

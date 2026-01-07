@@ -1,12 +1,11 @@
 const nodemailer = require('nodemailer');
-const logger = require('../utils/logger');
 
 // Configurar transporter de nodemailer
 let transporter = null;
 
 function initializeTransporter() {
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    logger.warn('Email configuration not found. Email sending will be disabled.');
+    console.warn('Email configuration not found. Email sending will be disabled.');
     return null;
   }
 
@@ -21,10 +20,10 @@ function initializeTransporter() {
       },
     });
 
-    logger.info('Email transporter initialized successfully');
+    console.log('Email transporter initialized successfully');
     return transporter;
   } catch (err) {
-    logger.error('Error initializing email transporter', { error: err.message });
+    console.error('Error initializing email transporter', err.message);
     return null;
   }
 }
@@ -161,10 +160,10 @@ Este es un email automático, por favor no respondas a este mensaje.
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    logger.info('Password reset email sent', { messageId: info.messageId, to });
+    console.log('Password reset email sent', info.messageId, to);
     return { success: true, messageId: info.messageId };
   } catch (err) {
-    logger.error('Error sending password reset email', { error: err.message, to });
+    console.error('Error sending password reset email', err.message, to);
     throw err;
   }
 }

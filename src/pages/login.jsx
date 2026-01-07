@@ -19,6 +19,9 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Obtener el rol seleccionado
+  const selectedRole = localStorage.getItem('selectedRole') || 'Vendor';
+
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }) => {
       return api.auth.login({ email, password });
@@ -89,7 +92,15 @@ export default function LoginPage() {
           <CardTitle className="text-center text-2xl font-bold text-[#F5F5F5]">
             Materi
           </CardTitle>
-          <p className="text-center text-sm text-[#B0B0B0]">Iniciar sesión</p>
+          <p className="text-center text-sm text-[#B0B0B0]">
+            Iniciar sesión como <span className="text-[#E53935] font-semibold">{selectedRole === 'Supplier' ? 'Proveedor' : 'Vendedor'}</span>
+          </p>
+          <Link
+            to="/"
+            className="text-xs text-[#666] hover:text-[#E53935] transition-colors text-center block"
+          >
+            Cambiar tipo de cuenta
+          </Link>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
