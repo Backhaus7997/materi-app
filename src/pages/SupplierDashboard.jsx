@@ -126,19 +126,17 @@ export default function SupplierDashboard() {
       return supplier;
     },
     onSuccess: async () => {
-      toast.success("Proveedor creado exitosamente", {
-        description: "Tu perfil de proveedor ha sido configurado."
+      toast.success("Perfil creado exitosamente", {
+        description: "Iniciá sesión nuevamente para continuar."
       });
       setSupplierFormOpen(false);
 
-      // Refetch user data y esperar antes de recargar
-      await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      await queryClient.refetchQueries({ queryKey: ['currentUser'] });
-
-      // Dar tiempo para que las queries se actualicen
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // Hacer logout para que el usuario vuelva a iniciar sesión
+      // y el JWT se regenere con el supplier_id correcto
+      setTimeout(async () => {
+        await api.auth.logout();
+        navigate(createPageUrl('login'));
+      }, 1500);
     },
     onError: (error) => {
       console.error('Failed to create supplier:', error);
