@@ -79,10 +79,17 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4">
       <Card className="w-full max-w-md bg-[#1E1E1E] border-[#2A2A2A]">
-        <CardHeader>
-          <CardTitle className="text-center text-xl text-[#F5F5F5]">
-            Iniciar sesión
+        <CardHeader className="space-y-4">
+          {/* Logo de Materi */}
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E53935] to-[#C62828] flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-3xl">M</span>
+            </div>
+          </div>
+          <CardTitle className="text-center text-2xl font-bold text-[#F5F5F5]">
+            Materi
           </CardTitle>
+          <p className="text-center text-sm text-[#B0B0B0]">Iniciar sesión</p>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -139,6 +146,16 @@ export default function LoginPage() {
               )}
               {loginMutation.isLoading ? "Ingresando..." : "Entrar"}
             </Button>
+
+            {/* Olvidé mi contraseña */}
+            <div className="text-center">
+              <Link
+                to="/forgot-password"
+                className="text-xs text-[#B0B0B0] hover:text-[#E53935] transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
 
             <p className="text-xs text-[#B0B0B0] text-center mt-2">
               ¿No tenés cuenta?{" "}
