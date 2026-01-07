@@ -86,7 +86,7 @@ const generalLimiter = rateLimit({
 const allowedOrigins = [
   "http://localhost:5173",
   "https://materi-app-eight.vercel.app",
-  process.env.FRONTEND_URL, // opcional
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 const corsOptions = {
