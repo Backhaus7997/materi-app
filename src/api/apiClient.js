@@ -35,10 +35,12 @@ function buildQS(query = {}) {
 
 const SupplierEntity = {
   async filter(query = {}) {
-    return request(`/suppliers${buildQS(query)}`);
+    const response = await request(`/suppliers${buildQS(query)}`);
+    return response.data || response;
   },
   async list() {
-    return request(`/suppliers`);
+    const response = await request(`/suppliers`);
+    return response.data || response;
   },
   async get(id) {
     return request(`/suppliers?id=${encodeURIComponent(id)}`);
@@ -58,10 +60,12 @@ const SupplierEntity = {
 
 const ProductEntity = {
   async filter(query = {}) {
-    return request(`/products${buildQS(query)}`);
+    const response = await request(`/products${buildQS(query)}`);
+    return response.data || response;
   },
   async list() {
-    return request(`/products`);
+    const response = await request(`/products`);
+    return response.data || response;
   },
   async get(id) {
     return request(`/products/${id}`);
@@ -118,7 +122,8 @@ const CartItemEntity = {
 
 const QuoteEntity = {
   async filter(query = {}) {
-    return request(`/quotes${buildQS(query)}`);
+    const response = await request(`/quotes${buildQS(query)}`);
+    return response.data || response;
   },
   async get(id) {
     return request(`/quotes?id=${encodeURIComponent(id)}`);
