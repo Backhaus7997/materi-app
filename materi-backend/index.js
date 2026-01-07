@@ -171,6 +171,39 @@ async function authMiddleware(req, res, next) {
 
 app.use(authMiddleware);
 
+// ---------- ADMIN: CLEAR DATABASE ----------
+app.post("/admin/clear-database", async (req, res) => {
+  try {
+    const { secret } = req.body;
+
+    // Solo permitir en desarrollo o con secret correcto
+    if (process.env.NODE_ENV === "production" && secret !== "CLEAR_DB_2026") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    // Eliminar en orden correcto para respetar foreign keys
+    await prisma.quoteLineItem.deleteMany({});
+    await prisma.quote.deleteMany({});
+    await prisma.quoteNumberSeq.deleteMany({});
+    await prisma.cartItem.deleteMany({});
+    await prisma.cart.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.supplier.deleteMany({});
+    await prisma.user.deleteMany({});
+
+    logger.info("Database cleared successfully");
+
+    res.json({
+      success: true,
+      message: "Base de datos limpiada exitosamente",
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    logger.error("Error clearing database", { error: err.message, stack: err.stack });
+    res.status(500).json({ error: "Error al limpiar base de datos" });
+  }
+});
+
 // ---------- HEALTH CHECK ----------
 app.get("/health", async (req, res) => {
   try {
