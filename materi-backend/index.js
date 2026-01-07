@@ -203,13 +203,14 @@ app.patch("/auth/me", async (req, res) => {
 
     const { name, supplier_id, user_role } = req.body;
 
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (user_role !== undefined) updateData.user_role = user_role;
+    if (supplier_id !== undefined) updateData.supplierId = supplier_id;
+
     const updated = await prisma.user.update({
       where: { id: req.user.id },
-      data: {
-        name: name ?? req.user.name,
-        user_role: user_role ?? req.user.user_role,
-        supplierId: supplier_id ?? req.user.supplierId,
-      },
+      data: updateData,
     });
 
     res.json(toPublicUser(updated));
