@@ -87,16 +87,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-3 py-6">
       <Card className="w-full max-w-md bg-[#1E1E1E] border-[#2A2A2A]">
-        <CardHeader className="space-y-3 md:space-y-4 pb-4">
+        <CardHeader className="space-y-2 md:space-y-4 pb-3 md:pb-4">
           {/* Logo de Materi */}
           <div className="flex justify-center">
-            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-[#E53935] to-[#C62828] flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-2xl md:text-3xl">M</span>
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-[#E53935] to-[#C62828] flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl md:text-3xl">M</span>
             </div>
           </div>
-          <CardTitle className="text-[#F5F5F5] text-xl md:text-2xl text-center">
+          <CardTitle className="text-[#F5F5F5] text-lg md:text-2xl text-center">
             Materi
           </CardTitle>
           <p className="text-center text-xs md:text-sm text-[#B0B0B0]">
@@ -104,28 +104,28 @@ export default function RegisterPage() {
           </p>
           <Link
             to="/"
-            className="text-xs text-[#666] hover:text-[#E53935] transition-colors text-center block"
+            className="text-[10px] md:text-xs text-[#666] hover:text-[#E53935] transition-colors text-center block"
           >
             Cambiar tipo de cuenta
           </Link>
         </CardHeader>
-        <CardContent className="pt-2">
-          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-[#F5F5F5] text-sm">
+        <CardContent className="pt-1 md:pt-2">
+          <form onSubmit={handleSubmit} className="space-y-2.5 md:space-y-4">
+            <div className="space-y-1 md:space-y-1.5">
+              <Label htmlFor="name" className="text-[#F5F5F5] text-xs md:text-sm">
                 Nombre
               </Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] h-10 md:h-11"
+                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] h-9 md:h-11 text-sm"
                 placeholder="Tu nombre"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-[#F5F5F5] text-sm">
+            <div className="space-y-1 md:space-y-1.5">
+              <Label htmlFor="email" className="text-[#F5F5F5] text-xs md:text-sm">
                 Email
               </Label>
               <Input
@@ -133,13 +133,13 @@ export default function RegisterPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] h-10 md:h-11"
+                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] h-9 md:h-11 text-sm"
                 placeholder="tu@email.com"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-[#F5F5F5] text-sm">
+            <div className="space-y-1 md:space-y-1.5">
+              <Label htmlFor="password" className="text-[#F5F5F5] text-xs md:text-sm">
                 Contraseña
               </Label>
               <div className="relative">
@@ -148,7 +148,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] pr-10 h-10 md:h-11"
+                  className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] pr-10 h-9 md:h-11 text-sm"
                   placeholder="••••••••"
                 />
                 <button
@@ -167,7 +167,7 @@ export default function RegisterPage() {
 
             <Button
               type="submit"
-              className="w-full bg-[#E53935] hover:bg-[#C62828] text-white h-10 md:h-11 text-sm md:text-base"
+              className="w-full bg-[#E53935] hover:bg-[#C62828] text-white h-9 md:h-11 text-sm md:text-base"
               disabled={registerMutation.isLoading}
             >
               {registerMutation.isLoading && (
@@ -176,7 +176,7 @@ export default function RegisterPage() {
               Crear cuenta
             </Button>
 
-            <p className="text-xs text-[#B0B0B0] text-center">
+            <p className="text-[10px] md:text-xs text-[#B0B0B0] text-center">
               ¿Ya tenés cuenta?{" "}
               <Link to="/login" className="text-[#E53935] hover:underline">
                 Iniciar sesión
