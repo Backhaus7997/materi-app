@@ -132,6 +132,8 @@ export default function SupplierDashboard() {
       queryClient.invalidateQueries({ queryKey: ['mySupplier'] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       setSupplierFormOpen(false);
+      // Recargar la página para reflejar el cambio
+      window.location.reload();
     },
     onError: (error) => {
       console.error('Failed to create supplier:', error);
