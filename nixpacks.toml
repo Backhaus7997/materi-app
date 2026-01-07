@@ -2,10 +2,10 @@
 nixPkgs = ['nodejs-18_x']
 
 [phases.install]
-cmds = ['npm ci']
+cmds = ['cd materi-backend && npm ci']
 
 [phases.build]
-cmds = ['npx prisma generate']
+cmds = ['cd materi-backend && npx prisma generate', 'cd materi-backend && npx prisma migrate deploy']
 
 [start]
-cmd = 'node index.js'
+cmd = 'cd materi-backend && node index.js'

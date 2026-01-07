@@ -24,5 +24,12 @@ dist-ssr
 *.sw?
 
 .env
-.vercel
+.env.local
 .env*.local
+.vercel
+
+# Backend
+materi-backend/.env
+materi-backend/.env.local
+materi-backend/dev.db
+materi-backend/logs/
