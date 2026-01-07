@@ -228,6 +228,19 @@ app.get("/health", async (req, res) => {
   }
 });
 
+app.get("/auth/me", async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "No autenticado" });
+    }
+
+    res.json(toPublicUser(req.user));
+  } catch (err) {
+    console.error("Error GET /auth/me", err);
+    res.status(500).json({ error: "Error al obtener usuario" });
+  }
+});
+
 app.patch("/auth/me", async (req, res) => {
   try {
     if (!req.user) {
