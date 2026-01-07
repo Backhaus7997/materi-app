@@ -125,15 +125,20 @@ export default function SupplierDashboard() {
       await api.auth.updateMe({ supplier_id: supplier.id });
       return supplier;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Proveedor creado exitosamente", {
         description: "Tu perfil de proveedor ha sido configurado."
       });
-      queryClient.invalidateQueries({ queryKey: ['mySupplier'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       setSupplierFormOpen(false);
-      // Recargar la página para reflejar el cambio
-      window.location.reload();
+
+      // Refetch user data y esperar antes de recargar
+      await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      await queryClient.refetchQueries({ queryKey: ['currentUser'] });
+
+      // Dar tiempo para que las queries se actualicen
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: (error) => {
       console.error('Failed to create supplier:', error);
