@@ -149,19 +149,22 @@ model Supplier {
 }
 
 model User {
-  id           String     @id
-  name         String
-  email        String     @unique
-  passwordHash String
-  user_role    String
-  supplierId   String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  Cart         Cart[]
-  CartItem     CartItem[]
-  Quote        Quote[]
-  Supplier     Supplier?  @relation(fields: [supplierId], references: [id])
+  id                     String     @id
+  name                   String
+  email                  String     @unique
+  passwordHash           String
+  user_role              String
+  supplierId             String?
+  resetPasswordToken     String?
+  resetPasswordExpiresAt DateTime?
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+  Cart                   Cart[]
+  CartItem               CartItem[]
+  Quote                  Quote[]
+  Supplier               Supplier?  @relation(fields: [supplierId], references: [id])
 
   @@index([user_role])
   @@index([supplierId])
+  @@index([resetPasswordToken])
 }

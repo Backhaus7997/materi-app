@@ -14,6 +14,8 @@ import ProductDetail from "./ProductDetail";
 import VendorCart from "./VendorCart";
 import LoginPage from "./login";      // página de login
 import RegisterPage from "./register"; // página de registro
+import ForgotPasswordPage from "./ForgotPassword"; // página de recuperación de contraseña
+import ResetPasswordPage from "./ResetPassword"; // página de restablecer contraseña
 
 const PAGES = {
   Quotes,
@@ -47,12 +49,14 @@ function PagesContent() {
   const path = location.pathname.toLowerCase();
 
   // 👇 Auth sin Layout: "/" también muestra el login
-  if (path === "/" || path.startsWith("/login") || path.startsWith("/register")) {
+  if (path === "/" || path.startsWith("/login") || path.startsWith("/register") || path.startsWith("/forgot-password") || path.startsWith("/reset-password")) {
     return (
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
     );
   }

@@ -9,9 +9,11 @@ const rateLimit = require("express-rate-limit");
 const validator = require("validator");
 const winston = require("winston");
 const compression = require("compression");
+const crypto = require("crypto");
 const { createId } = require("@paralleldrive/cuid2");
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
+const { sendPasswordResetEmail } = require("./services/emailService");
 
 // ✅ Configuración de Winston logger
 const logger = winston.createLogger({
@@ -274,6 +276,124 @@ app.post("/auth/logout", (req, res) => {
     secure: isProd,
   });
   res.json({ ok: true });
+});
+
+// POST /auth/forgot-password - Envía email con token de recuperación
+app.post("/auth/forgot-password", authLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "El email es requerido" });
+    }
+
+    // Normalizar email
+    const normalizedEmail = validator.normalizeEmail(email);
+
+    // Buscar usuario
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    // Por seguridad, siempre devolver el mismo mensaje aunque el usuario no exista
+    if (!user) {
+      logger.warn("Password reset requested for non-existent email", { email: normalizedEmail });
+      return res.json({
+        message: "Si el email existe, recibirás un enlace de recuperación en tu correo."
+      });
+    }
+
+    // Generar token de reset seguro (32 bytes = 64 caracteres hex)
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    // Hash del token para guardarlo en la DB
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    // Expiración: 1 hora desde ahora
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    // Guardar token hasheado en la DB
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken: hashedToken,
+        resetPasswordExpiresAt: expiresAt,
+      },
+    });
+
+    // Enviar email con el token SIN hashear
+    try {
+      await sendPasswordResetEmail(user.email, resetToken, user.name);
+      logger.info("Password reset email sent successfully", { userId: user.id });
+    } catch (emailError) {
+      logger.error("Failed to send password reset email", { error: emailError.message, userId: user.id });
+      return res.status(500).json({
+        error: "No se pudo enviar el email. Por favor contactá al soporte."
+      });
+    }
+
+    res.json({
+      message: "Si el email existe, recibirás un enlace de recuperación en tu correo."
+    });
+  } catch (err) {
+    logger.error("Error in /auth/forgot-password", { error: err.message, stack: err.stack });
+    res.status(500).json({ error: "Error al procesar la solicitud" });
+  }
+});
+
+// POST /auth/reset-password - Restablece la contraseña con el token
+app.post("/auth/reset-password", authLimiter, async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: "Token y contraseña son requeridos" });
+    }
+
+    // Validar longitud mínima de password
+    if (password.length < 6) {
+      return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
+    }
+
+    // Hash del token recibido para comparar con la DB
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    // Buscar usuario con el token válido y no expirado
+    const user = await prisma.user.findFirst({
+      where: {
+        resetPasswordToken: hashedToken,
+        resetPasswordExpiresAt: {
+          gt: new Date(), // Mayor que ahora (no expirado)
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "Token inválido o expirado. Por favor solicitá un nuevo enlace de recuperación."
+      });
+    }
+
+    // Hashear la nueva contraseña
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Actualizar contraseña y limpiar token de reset
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash,
+        resetPasswordToken: null,
+        resetPasswordExpiresAt: null,
+      },
+    });
+
+    logger.info("Password reset successfully", { userId: user.id });
+
+    res.json({ message: "Contraseña actualizada exitosamente" });
+  } catch (err) {
+    logger.error("Error in /auth/reset-password", { error: err.message, stack: err.stack });
+    res.status(500).json({ error: "Error al restablecer la contraseña" });
+  }
 });
 
 app.post("/auth/register", authLimiter, async (req, res) => {

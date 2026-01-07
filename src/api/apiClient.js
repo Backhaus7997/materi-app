@@ -220,5 +220,19 @@ export const api = {
     async logout() {
       return request("/auth/logout", { method: "POST" });
     },
+
+    async forgotPassword(email) {
+      return request("/auth/forgot-password", {
+        method: "POST",
+        body: { email },
+      });
+    },
+
+    async resetPassword(token, password) {
+      return request("/auth/reset-password", {
+        method: "POST",
+        body: { token, password },
+      });
+    },
   },
 };
