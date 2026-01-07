@@ -80,19 +80,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8">
       <Card className="w-full max-w-md bg-[#1E1E1E] border-[#2A2A2A]">
-        <CardHeader className="space-y-4">
+        <CardHeader className="space-y-3 md:space-y-4 pb-4">
           {/* Logo de Materi */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E53935] to-[#C62828] flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-3xl">M</span>
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-[#E53935] to-[#C62828] flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-2xl md:text-3xl">M</span>
             </div>
           </div>
-          <CardTitle className="text-center text-2xl font-bold text-[#F5F5F5]">
+          <CardTitle className="text-center text-xl md:text-2xl font-bold text-[#F5F5F5]">
             Materi
           </CardTitle>
-          <p className="text-center text-sm text-[#B0B0B0]">
+          <p className="text-center text-xs md:text-sm text-[#B0B0B0]">
             Iniciar sesión como <span className="text-[#E53935] font-semibold">{selectedRole === 'Supplier' ? 'Proveedor' : 'Vendedor'}</span>
           </p>
           <Link
@@ -102,10 +102,10 @@ export default function LoginPage() {
             Cambiar tipo de cuenta
           </Link>
         </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#F5F5F5]">
+        <CardContent className="pt-2">
+          <form className="space-y-3 md:space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-1.5 md:space-y-2">
+              <Label htmlFor="email" className="text-[#F5F5F5] text-sm">
                 Email
               </Label>
               <Input
@@ -114,13 +114,13 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5]"
+                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] h-10 md:h-11"
                 placeholder="tu@email.com"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-[#F5F5F5]">
+            <div className="space-y-1.5 md:space-y-2">
+              <Label htmlFor="password" className="text-[#F5F5F5] text-sm">
                 Contraseña
               </Label>
               <div className="relative">
@@ -130,7 +130,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] pr-10"
+                  className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] pr-10 h-10 md:h-11"
                   placeholder="••••••••"
                 />
                 <button
@@ -149,7 +149,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-[#E53935] hover:bg-[#C62828] text-white"
+              className="w-full bg-[#E53935] hover:bg-[#C62828] text-white h-10 md:h-11 text-sm md:text-base"
               disabled={loginMutation.isLoading}
             >
               {loginMutation.isLoading && (
@@ -159,7 +159,7 @@ export default function LoginPage() {
             </Button>
 
             {/* Olvidé mi contraseña */}
-            <div className="text-center">
+            <div className="text-center pt-1">
               <Link
                 to="/forgot-password"
                 className="text-xs text-[#B0B0B0] hover:text-[#E53935] transition-colors"
@@ -168,7 +168,7 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            <p className="text-xs text-[#B0B0B0] text-center mt-2">
+            <p className="text-xs text-[#B0B0B0] text-center">
               ¿No tenés cuenta?{" "}
               <Link to="/register" className="text-[#E53935] hover:underline">
                 Crear cuenta

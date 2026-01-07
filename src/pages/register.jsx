@@ -87,19 +87,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8">
       <Card className="w-full max-w-md bg-[#1E1E1E] border-[#2A2A2A]">
-        <CardHeader className="space-y-4">
+        <CardHeader className="space-y-3 md:space-y-4 pb-4">
           {/* Logo de Materi */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E53935] to-[#C62828] flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-3xl">M</span>
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-[#E53935] to-[#C62828] flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-2xl md:text-3xl">M</span>
             </div>
           </div>
-          <CardTitle className="text-[#F5F5F5] text-2xl text-center">
+          <CardTitle className="text-[#F5F5F5] text-xl md:text-2xl text-center">
             Materi
           </CardTitle>
-          <p className="text-center text-sm text-[#B0B0B0]">
+          <p className="text-center text-xs md:text-sm text-[#B0B0B0]">
             Crear cuenta como <span className="text-[#E53935] font-semibold">{selectedRole === 'Supplier' ? 'Proveedor' : 'Vendedor'}</span>
           </p>
           <Link
@@ -109,23 +109,23 @@ export default function RegisterPage() {
             Cambiar tipo de cuenta
           </Link>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <Label htmlFor="name" className="text-[#F5F5F5]">
+        <CardContent className="pt-2">
+          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-[#F5F5F5] text-sm">
                 Nombre
               </Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5]"
+                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] h-10 md:h-11"
                 placeholder="Tu nombre"
               />
             </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="email" className="text-[#F5F5F5]">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-[#F5F5F5] text-sm">
                 Email
               </Label>
               <Input
@@ -133,13 +133,13 @@ export default function RegisterPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5]"
+                className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] h-10 md:h-11"
                 placeholder="tu@email.com"
               />
             </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="password" className="text-[#F5F5F5]">
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-[#F5F5F5] text-sm">
                 Contraseña
               </Label>
               <div className="relative">
@@ -148,7 +148,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] pr-10"
+                  className="bg-[#121212] border-[#2A2A2A] text-[#F5F5F5] pr-10 h-10 md:h-11"
                   placeholder="••••••••"
                 />
                 <button
@@ -167,7 +167,7 @@ export default function RegisterPage() {
 
             <Button
               type="submit"
-              className="w-full bg-[#E53935] hover:bg-[#C62828] text-white mt-2"
+              className="w-full bg-[#E53935] hover:bg-[#C62828] text-white h-10 md:h-11 text-sm md:text-base"
               disabled={registerMutation.isLoading}
             >
               {registerMutation.isLoading && (
@@ -176,7 +176,7 @@ export default function RegisterPage() {
               Crear cuenta
             </Button>
 
-            <p className="text-xs text-[#B0B0B0] text-center mt-2">
+            <p className="text-xs text-[#B0B0B0] text-center">
               ¿Ya tenés cuenta?{" "}
               <Link to="/login" className="text-[#E53935] hover:underline">
                 Iniciar sesión
