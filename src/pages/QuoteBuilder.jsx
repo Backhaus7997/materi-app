@@ -813,7 +813,7 @@ export default function QuoteBuilder() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#B0B0B0]">Estado</span>
-                    <span className="font-medium text-[#F5F5F5]">{quoteData.status}</span>
+                    <span className="font-medium text-[#F5F5F5]">{STATUS_LABELS[quoteData.status] || quoteData.status}</span>
                   </div>
                 </div>
               </CardContent>
