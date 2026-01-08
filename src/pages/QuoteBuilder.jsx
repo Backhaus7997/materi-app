@@ -21,6 +21,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft,
   Plus,
   Save,
@@ -73,6 +81,9 @@ export default function QuoteBuilder() {
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -203,8 +214,25 @@ export default function QuoteBuilder() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quoteId]);
 
+  // Rastrear cambios sin guardar
+  useEffect(() => {
+    if (lineItems.length > 0 || quoteData.customer_name || quoteData.customer_company) {
+      setHasUnsavedChanges(true);
+    }
+  }, [lineItems, quoteData]);
 
+  // Advertencia antes de cerrar la pestaña/navegador
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
 
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const globalMargin = parseFloat(quoteData.global_margin_percent) || 0;
 
@@ -372,6 +400,7 @@ export default function QuoteBuilder() {
         queryClient.invalidateQueries({ queryKey: ['quote', savedQuoteId] });
         queryClient.invalidateQueries({ queryKey: ['quoteLineItems', savedQuoteId] });
 
+        setHasUnsavedChanges(false); // Limpiar flag de cambios sin guardar
         toast.success("Presupuesto guardado ✅");
         navigate(createPageUrl('Quotes'));
       } catch (err) {
@@ -394,6 +423,7 @@ export default function QuoteBuilder() {
 
       await api.entities.Quote.delete(quoteId);
 
+      setHasUnsavedChanges(false); // Limpiar flag de cambios sin guardar
       toast.success('Presupuesto eliminado');
       navigate(createPageUrl('Quotes'));
     } catch (error) {
@@ -464,6 +494,7 @@ export default function QuoteBuilder() {
       toast.success('Productos exportados al carrito correctamente');
       queryClient.invalidateQueries({ queryKey: ['cartItems', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['cartItems'] });
+      setHasUnsavedChanges(false); // Limpiar flag antes de navegar
       navigate(createPageUrl('VendorCart'));
     } catch (error) {
       console.error('Export failed:', error);
@@ -471,6 +502,29 @@ export default function QuoteBuilder() {
     } finally {
       setExporting(false);
     }
+  };
+
+  // Manejar navegación con confirmación
+  const handleNavigateAway = (path) => {
+    if (hasUnsavedChanges) {
+      setPendingNavigation(path);
+      setShowUnsavedDialog(true);
+    } else {
+      navigate(path);
+    }
+  };
+
+  const confirmLeave = () => {
+    setHasUnsavedChanges(false);
+    setShowUnsavedDialog(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  };
+
+  const cancelLeave = () => {
+    setShowUnsavedDialog(false);
+    setPendingNavigation(null);
   };
 
   const visibleItems = lineItems.filter(item => !item.isDeleted);
@@ -488,11 +542,14 @@ export default function QuoteBuilder() {
 
         <div className="space-y-4 md:space-y-6 pb-24">
           <div className="flex items-center gap-2 md:gap-4">
-            <Link to={createPageUrl('Quotes')}>
-              <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 md:h-10 md:w-10">
-                <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 h-9 w-9 md:h-10 md:w-10"
+              onClick={() => handleNavigateAway(createPageUrl('Quotes'))}
+            >
+              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
+            </Button>
 
             <div className="flex-1 min-w-0">
               <h1 className="text-base md:text-2xl font-bold text-[#F5F5F5] truncate">
@@ -829,6 +886,33 @@ export default function QuoteBuilder() {
         products={products}
         onAdd={handleAddItem}
       />
+
+      <Dialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <DialogContent className="bg-[#1E1E1E] border-[#2A2A2A] text-[#F5F5F5]">
+          <DialogHeader>
+            <DialogTitle className="text-[#F5F5F5]">Cambios sin guardar</DialogTitle>
+            <DialogDescription className="text-[#B0B0B0]">
+              Tienes cambios sin guardar en este presupuesto. ¿Estás seguro de que quieres salir sin guardar?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={cancelLeave}
+              className="border-[#2A2A2A] text-[#F5F5F5] hover:bg-[#2A2A2A]"
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmLeave}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Salir sin guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
