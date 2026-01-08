@@ -383,17 +383,16 @@ export default function QuoteBuilder() {
     };
 
   const handleDeleteQuote = async () => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este presupuesto? Esta acción no se puede deshacer.')) {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este presupuesto?')) {
       return;
     }
 
     setSaving(true);
     try {
-      const items = await api.entities.QuoteLineItem.filter({ quote_id: quoteId });
-      await Promise.all(items.map(item => api.entities.QuoteLineItem.delete(item.id)));
-
+      // Soft delete: el backend marca deleted_at automáticamente
       await api.entities.Quote.delete(quoteId);
 
+      setHasUnsavedChanges(false);
       toast.success('Presupuesto eliminado');
       navigate(createPageUrl('Quotes'));
     } catch (error) {

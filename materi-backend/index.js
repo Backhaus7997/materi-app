@@ -853,7 +853,7 @@ app.delete("/cart-items/:id", async (req, res) => {
 app.get("/quotes", async (req, res) => {
   try {
     const { vendor_id, id, page, limit } = req.query;
-    const where = {};
+    const where = { deleted_at: null }; // Solo presupuestos no eliminados
 
     if (id) where.id = id;
     if (vendor_id) where.vendorId = vendor_id;
@@ -988,12 +988,11 @@ app.delete("/quotes/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Evita problemas de FK si no tenés cascade en Prisma
-    await prisma.quoteLineItem.deleteMany({
-      where: { quoteId: id },
+    // Soft delete: solo marcamos como eliminado
+    await prisma.quote.update({
+      where: { id },
+      data: { deleted_at: new Date() }
     });
-
-    await prisma.quote.delete({ where: { id } });
 
     res.status(204).end();
   } catch (err) {
