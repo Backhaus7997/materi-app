@@ -80,8 +80,8 @@ export default function QuoteLineItemRow({
           <Label className="text-[#B0B0B0]">Cantidad</Label>
           <Input
             type="number"
-            min="0.01"
-            step="0.01"
+            min="1"
+            step="1"
             value={item.quantity ?? ""}
             onChange={(e) => handleQtyChange(e.target.value)}
             className="bg-[#1E1E1E] border-[#1E1E1E] text-[#F5F5F5]"
