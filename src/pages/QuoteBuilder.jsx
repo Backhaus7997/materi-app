@@ -486,31 +486,31 @@ export default function QuoteBuilder() {
 
   return (
 
-        <div className="space-y-6 pb-24">
-          <div className="flex items-center gap-4">
+        <div className="space-y-4 md:space-y-6 pb-24">
+          <div className="flex items-center gap-2 md:gap-4">
             <Link to={createPageUrl('Quotes')}>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <ArrowLeft className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 md:h-10 md:w-10">
+                <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
               </Button>
             </Link>
 
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-[#F5F5F5]">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base md:text-2xl font-bold text-[#F5F5F5] truncate">
                 {quoteId ? 'Editar presupuesto' : 'Nuevo presupuesto'}
               </h1>
-              <p className="text-[#B0B0B0]">
+              <p className="text-xs md:text-sm text-[#B0B0B0] truncate">
                 {quoteData.quote_number || 'Crear un nuevo presupuesto'}
               </p>
             </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 md:gap-2">
       {quoteId && (
         <Button
           variant="outline"
           size="icon"
           onClick={handleDeleteQuote}
           disabled={saving}
-          className="h-11 w-11 rounded-xl border-[#2A2A2A] text-red-400 hover:bg-red-900/20 hover:text-red-400 disabled:opacity-60"
+          className="h-10 w-10 md:h-11 md:w-11 rounded-lg md:rounded-xl border-[#2A2A2A] text-red-400 hover:bg-red-900/20 hover:text-red-400 disabled:opacity-60"
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -519,48 +519,48 @@ export default function QuoteBuilder() {
       <Button
         onClick={handleExportToCart}
         disabled={exporting || visibleItems.length === 0}
-        className="h-11 px-6 rounded-xl font-medium bg-[#2A2A2A] text-[#F5F5F5] hover:bg-[#3A3A3A] disabled:bg-[#2A2A2A] disabled:text-[#777] disabled:opacity-100 disabled:cursor-not-allowed"
+        className="h-10 w-10 md:h-11 md:w-auto md:px-6 rounded-lg md:rounded-xl font-medium bg-[#2A2A2A] text-[#F5F5F5] hover:bg-[#3A3A3A] disabled:bg-[#2A2A2A] disabled:text-[#777] disabled:opacity-100 disabled:cursor-not-allowed"
       >
         {exporting ? (
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 className="w-4 h-4 md:mr-2 animate-spin" />
         ) : (
-          <ShoppingCart className="w-4 h-4 mr-2" />
+          <ShoppingCart className="w-4 h-4 md:mr-2" />
         )}
-        Exportar al carrito
+        <span className="hidden md:inline text-sm">Exportar al carrito</span>
       </Button>
 
       <Button
         onClick={handleSave}
         disabled={saving}
-        className="h-11 px-6 rounded-xl font-medium bg-[#E53935] text-white hover:bg-[#C62828] disabled:bg-[#E53935] disabled:text-white disabled:opacity-60 disabled:cursor-not-allowed"
+        className="h-10 w-10 md:h-11 md:w-auto md:px-6 rounded-lg md:rounded-xl font-medium bg-[#E53935] text-white hover:bg-[#C62828] disabled:bg-[#E53935] disabled:text-white disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {saving ? (
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 className="w-4 h-4 md:mr-2 animate-spin" />
         ) : (
-          <Save className="w-4 h-4 mr-2" />
+          <Save className="w-4 h-4 md:mr-2" />
         )}
-        Guardar presupuesto
+        <span className="hidden md:inline text-sm">Guardar presupuesto</span>
       </Button>
     </div>
           </div>
 
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 md:space-y-6">
           {/* Customer Info */}
           <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg text-[#F5F5F5]">
-                <User className="w-5 h-5 text-[#E53935]" />
+            <CardHeader className="pb-3 md:pb-4">
+              <CardTitle className="flex items-center gap-2 text-sm md:text-lg text-[#F5F5F5]">
+                <User className="w-4 h-4 md:w-5 md:h-5 text-[#E53935]" />
                 Información del cliente
               </CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[#B0B0B0]">Nombre del cliente *</Label>
+            <CardContent className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-[#B0B0B0] text-xs md:text-sm">Nombre del cliente *</Label>
                   <Input
                     value={quoteData.customer_name}
                     onChange={(e) => {
@@ -568,34 +568,34 @@ export default function QuoteBuilder() {
                       setQuoteData({ ...quoteData, customer_name: cleanValue });
                     }}
                     placeholder="Juan Pérez"
-                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
+                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] h-9 md:h-10 text-sm"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-[#B0B0B0]">Empresa</Label>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-[#B0B0B0] text-xs md:text-sm">Empresa</Label>
                   <Input
                     value={quoteData.customer_company}
                     onChange={(e) => setQuoteData({ ...quoteData, customer_company: e.target.value })}
                     placeholder="Empresa S.A."
-                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
+                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] h-9 md:h-10 text-sm"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-[#B0B0B0]">Correo electrónico</Label>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-[#B0B0B0] text-xs md:text-sm">Correo electrónico</Label>
                   <Input
                     type="email"
                     inputMode="email"
                     value={quoteData.customer_email}
                     onChange={(e) => setQuoteData({ ...quoteData, customer_email: e.target.value })}
                     placeholder="juan@ejemplo.com"
-                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
+                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] h-9 md:h-10 text-sm"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-[#B0B0B0]">Teléfono</Label>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-[#B0B0B0] text-xs md:text-sm">Teléfono</Label>
                   <Input
                     type="tel"
                     inputMode="tel"
@@ -605,7 +605,7 @@ export default function QuoteBuilder() {
                       setQuoteData({ ...quoteData, customer_phone: v });
                     }}
                     placeholder="+54 11 2345-6789"
-                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
+                    className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] h-9 md:h-10 text-sm"
                   />
                 </div>
               </div>
@@ -614,20 +614,20 @@ export default function QuoteBuilder() {
 
           {/* Quote Settings */}
           <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg text-[#F5F5F5]">
-                <Percent className="w-5 h-5 text-[#E53935]" />
+            <CardHeader className="pb-3 md:pb-4">
+              <CardTitle className="flex items-center gap-2 text-sm md:text-lg text-[#F5F5F5]">
+                <Percent className="w-4 h-4 md:w-5 md:h-5 text-[#E53935]" />
                 Configuración del presupuesto
               </CardTitle>
             </CardHeader>
 
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[#B0B0B0]">Número de presupuesto</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-[#B0B0B0] text-xs md:text-sm">Número de presupuesto</Label>
 
                   {quoteData?.quote_number ? (
-                 <div className="h-10 w-full px-3 flex items-center rounded-md bg-[#2A2A2A] border border-[#2A2A2A] text-[#B0B0B0] opacity-80 cursor-not-allowed select-none">
+                 <div className="h-9 md:h-10 w-full px-3 flex items-center text-xs md:text-sm rounded-md bg-[#2A2A2A] border border-[#2A2A2A] text-[#B0B0B0] opacity-80 cursor-not-allowed select-none">
                      {quoteData.quote_number}
                   </div>
 
@@ -636,20 +636,20 @@ export default function QuoteBuilder() {
                       value=""
                       disabled
                       placeholder="Se asigna automáticamente"
-                      className="bg-[#2A2A2A] border-[#2A2A2A] text-[#B0B0B0] disabled:opacity-100"
+                      className="bg-[#2A2A2A] border-[#2A2A2A] text-[#B0B0B0] disabled:opacity-100 h-9 md:h-10 text-xs md:text-sm"
                     />
                   )}
                 </div>
 
 
-                <div className="space-y-2">
-                  <Label className="text-[#B0B0B0]">Estado</Label>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-[#B0B0B0] text-xs md:text-sm">Estado</Label>
 
                   <Select
                     value={quoteData.status || "Draft"}
                     onValueChange={(v) => setQuoteData({ ...quoteData, status: v })}
                   >
-                    <SelectTrigger className="h-10 w-full bg-[#2A2A2A] border-[#2A2A2A] text-white">
+                    <SelectTrigger className="h-9 md:h-10 w-full bg-[#2A2A2A] border-[#2A2A2A] text-white text-xs md:text-sm">
                       <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
 
@@ -659,7 +659,7 @@ export default function QuoteBuilder() {
                           key={s}
                           value={s}
                           className="
-                            text-white cursor-pointer
+                            text-white cursor-pointer text-xs md:text-sm
                             focus:bg-[#2A2A2A] focus:text-white
                             data-[highlighted]:bg-[#2A2A2A] data-[highlighted]:text-white
                             data-[state=checked]:bg-[#2A2A2A] data-[state=checked]:text-white
@@ -674,8 +674,8 @@ export default function QuoteBuilder() {
                 </div>
 
 
-                <div className="space-y-2">
-                  <Label className="text-[#B0B0B0]">Margen global %</Label>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-[#B0B0B0] text-xs md:text-sm">Margen global %</Label>
                   <Input
                     type="number"
                     min="0"
@@ -683,7 +683,7 @@ export default function QuoteBuilder() {
                     value={quoteData.global_margin_percent}
                     onChange={(e) => setQuoteData({ ...quoteData, global_margin_percent: e.target.value })}
                     placeholder="20"
-                    className="h-10 w-full bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5]"
+                    className="h-9 md:h-10 w-full bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] text-sm"
                   />
                 </div>
               </div>
@@ -692,20 +692,20 @@ export default function QuoteBuilder() {
 
           {/* Line Items */}
           <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3 md:pb-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-lg text-[#F5F5F5]">
-                  <Package className="w-5 h-5 text-[#E53935]" />
+                <CardTitle className="flex items-center gap-2 text-sm md:text-lg text-[#F5F5F5]">
+                  <Package className="w-4 h-4 md:w-5 md:h-5 text-[#E53935]" />
                   Ítems ({visibleItems.length})
                 </CardTitle>
 
             <Button
             onClick={() => setAddItemOpen(true)}
             size="sm"
-            className="bg-[#E53935] text-white hover:bg-[#C62828]"
+            className="bg-[#E53935] text-white hover:bg-[#C62828] h-8 md:h-9 px-2.5 md:px-4 text-xs md:text-sm"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar ítem
+            <Plus className="w-3.5 h-3.5 md:w-4 md:h-4 md:mr-2" />
+            <span className="hidden sm:inline">Agregar ítem</span>
           </Button>
 
               </div>
@@ -713,20 +713,20 @@ export default function QuoteBuilder() {
 
             <CardContent>
               {visibleItems.length === 0 ? (
-                <div className="text-center py-12 border-2 border-dashed border-[#2A2A2A] rounded-xl">
-                  <Package className="w-12 h-12 mx-auto mb-3 text-[#2A2A2A]" />
-                  <p className="text-[#B0B0B0]">Todavía no hay ítems</p>
+                <div className="text-center py-8 md:py-12 border-2 border-dashed border-[#2A2A2A] rounded-xl">
+                  <Package className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 md:mb-3 text-[#2A2A2A]" />
+                  <p className="text-[#B0B0B0] text-sm md:text-base">Todavía no hay ítems</p>
               <Button
                 onClick={() => setAddItemOpen(true)}
-                className="mt-4 bg-[#E53935] text-white hover:bg-[#C62828]"
+                className="mt-3 md:mt-4 bg-[#E53935] text-white hover:bg-[#C62828] h-9 md:h-10 text-xs md:text-sm"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-3.5 h-3.5 md:w-4 md:h-4 mr-2" />
                 Agregar primer ítem
               </Button>
 
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {lineItems.map((item, index) => (
                     !item.isDeleted && (
                       <QuoteLineItemRow
@@ -746,16 +746,16 @@ export default function QuoteBuilder() {
 
           {/* Notes */}
           <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg text-[#F5F5F5]">Notas internas</CardTitle>
+            <CardHeader className="pb-3 md:pb-4">
+              <CardTitle className="text-sm md:text-lg text-[#F5F5F5]">Notas internas</CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={quoteData.notes}
                 onChange={(e) => setQuoteData({ ...quoteData, notes: e.target.value })}
                 placeholder="Agregar notas internas sobre este presupuesto..."
-                rows={4}
-                className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] placeholder:text-[#666]"
+                rows={3}
+                className="bg-[#2A2A2A] border-[#2A2A2A] text-[#F5F5F5] placeholder:text-[#666] text-xs md:text-sm"
               />
             </CardContent>
           </Card>
@@ -763,36 +763,36 @@ export default function QuoteBuilder() {
 
         {/* Summary Sidebar */}
         <div className="lg:col-span-1">
-          <div className="sticky top-6 space-y-4">
+          <div className="lg:sticky lg:top-6 space-y-3 md:space-y-4">
             <Card className="bg-[#1E1E1E] border-[#2A2A2A] text-white">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-[#F5F5F5]">Resumen del presupuesto</CardTitle>
+              <CardHeader className="pb-2 md:pb-3">
+                <CardTitle className="text-sm md:text-lg text-[#F5F5F5]">Resumen del presupuesto</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#B0B0B0]">Costo total</span>
-                  <span className="text-xl font-semibold text-[#F5F5F5]">
+                  <span className="text-[#B0B0B0] text-xs md:text-sm">Costo total</span>
+                  <span className="text-base md:text-xl font-semibold text-[#F5F5F5]">
                     ${totals.totalCost.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#B0B0B0]">Venta total</span>
-                  <span className="text-xl font-semibold text-[#E53935]">
+                  <span className="text-[#B0B0B0] text-xs md:text-sm">Venta total</span>
+                  <span className="text-base md:text-xl font-semibold text-[#E53935]">
                     ${totals.totalSale.toFixed(2)}
                   </span>
                 </div>
-                <div className="pt-4 border-t border-[#2A2A2A]">
+                <div className="pt-3 md:pt-4 border-t border-[#2A2A2A]">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-emerald-400" />
-                      <span className="text-[#F5F5F5] font-medium">Ganancia</span>
+                    <div className="flex items-center gap-1.5 md:gap-2">
+                      <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />
+                      <span className="text-[#F5F5F5] font-medium text-xs md:text-base">Ganancia</span>
                     </div>
-                    <span className={`text-2xl font-bold ${totals.totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className={`text-lg md:text-2xl font-bold ${totals.totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                       ${totals.totalProfit.toFixed(2)}
                     </span>
                   </div>
                   {totals.totalCost > 0 && (
-                    <p className="text-right text-sm text-[#B0B0B0] mt-1">
+                    <p className="text-right text-[10px] md:text-sm text-[#B0B0B0] mt-1">
                       {((totals.totalProfit / totals.totalCost) * 100).toFixed(1)}% Margen
                     </p>
                   )}
@@ -801,8 +801,8 @@ export default function QuoteBuilder() {
             </Card>
 
             <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-              <CardContent className="pt-6">
-                <div className="space-y-3 text-sm">
+              <CardContent className="pt-4 md:pt-6">
+                <div className="space-y-2 md:space-y-3 text-xs md:text-sm">
                   <div className="flex justify-between">
                     <span className="text-[#B0B0B0]">Ítems</span>
                     <span className="font-medium text-[#F5F5F5]">{visibleItems.length}</span>

@@ -48,6 +48,9 @@ if (process.env.NODE_ENV !== "production") {
 const prisma = new PrismaClient();
 const app = express();
 
+// ✅ Trust proxy - necesario para Railway/Vercel/servicios con proxies
+app.set('trust proxy', 1);
+
 // Validar JWT_SECRET en producción
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -879,12 +882,11 @@ app.get("/cart-items", async (req, res) => {
       where,
       orderBy: { createdAt: "desc" },
       include: {
-        supplier: { select: { id:true, name:true, company_name:true, phone:true, email:true } },
         product: { select: { id:true, name:true, supplierId:true, supplier_name:true, unit_of_measure:true, base_price:true, currency:true } },
       },
     });
 
-res.json(items.map(i => ({ ...i, supplier_phone: i?.supplier?.phone || null })));
+res.json(items);
 
   } catch (err) {
     console.error("Error GET /cart-items", err);
@@ -943,7 +945,7 @@ app.post('/cart-items', async (req, res) => {
       },
     });
 
-    return res.status(201).json({ ...item, supplier_phone: item?.supplier?.phone || null });
+    return res.status(201).json(item);
   } catch (err) {
     console.error('Error POST /cart-items', err);
     return res.status(500).json({
@@ -995,7 +997,7 @@ app.patch("/cart-items/:id", async (req, res) => {
       data: updateData,
     });
 
-    res.json({ ...item, supplier_phone: item?.supplier?.phone || null });
+    res.json(item);
   } catch (err) {
     console.error("Error PATCH /cart-items/:id", err);
     res.status(500).json({ error: "Error al actualizar item de carrito" });

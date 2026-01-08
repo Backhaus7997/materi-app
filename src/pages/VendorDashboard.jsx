@@ -69,65 +69,65 @@ export default function VendorDashboard() {
   }, 0);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-[#F5F5F5]">¡Bienvenido de nuevo!</h1>
-        <p className="text-[#B0B0B0] mt-1">Aquí tienes un resumen de tu actividad como vendedor</p>
+        <h1 className="text-lg md:text-2xl font-bold text-[#F5F5F5]">¡Bienvenido de nuevo!</h1>
+        <p className="text-[#B0B0B0] mt-1 text-xs md:text-sm">Aquí tienes un resumen de tu actividad como vendedor</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#B0B0B0]">Proveedores activos</p>
-                <p className="text-2xl font-bold text-[#F5F5F5] mt-1">{suppliers.length}</p>
+                <p className="text-[10px] md:text-sm text-[#B0B0B0]">Proveedores activos</p>
+                <p className="text-lg md:text-2xl font-bold text-[#F5F5F5] mt-0.5 md:mt-1">{suppliers.length}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-[#E53935]/20 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-[#E53935]" />
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-[#E53935]/20 flex items-center justify-center">
+                <Building2 className="w-4 h-4 md:w-6 md:h-6 text-[#E53935]" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#B0B0B0]">Productos disponibles</p>
-                <p className="text-2xl font-bold text-[#F5F5F5] mt-1">{products.length}</p>
+                <p className="text-[10px] md:text-sm text-[#B0B0B0]">Productos disponibles</p>
+                <p className="text-lg md:text-2xl font-bold text-[#F5F5F5] mt-0.5 md:mt-1">{products.length}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-[#E53935]/20 flex items-center justify-center">
-                <Package className="w-6 h-6 text-[#E53935]" />
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-[#E53935]/20 flex items-center justify-center">
+                <Package className="w-4 h-4 md:w-6 md:h-6 text-[#E53935]" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#B0B0B0]">Ítems en carrito</p>
-                <p className="text-2xl font-bold text-[#F5F5F5] mt-1">{cartItems.length}</p>
+                <p className="text-[10px] md:text-sm text-[#B0B0B0]">Ítems en carrito</p>
+                <p className="text-lg md:text-2xl font-bold text-[#F5F5F5] mt-0.5 md:mt-1">{cartItems.length}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-[#E53935]/20 flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-[#E53935]" />
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-[#E53935]/20 flex items-center justify-center">
+                <ShoppingCart className="w-4 h-4 md:w-6 md:h-6 text-[#E53935]" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#B0B0B0]">Valor del carrito</p>
-                <p className="text-2xl font-bold text-[#F5F5F5] mt-1">${cartTotal.toFixed(2)}</p>
+                <p className="text-[10px] md:text-sm text-[#B0B0B0]">Valor del carrito</p>
+                <p className="text-lg md:text-2xl font-bold text-[#F5F5F5] mt-0.5 md:mt-1">${cartTotal.toFixed(2)}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-900/30 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-emerald-400" />
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-emerald-900/30 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-emerald-400" />
               </div>
             </div>
           </CardContent>
@@ -135,21 +135,21 @@ export default function VendorDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
         <Card className="bg-[#1E1E1E] border-[#2A2A2A] hover:shadow-lg hover:border-[#E53935]/50 transition-all cursor-pointer group">
           <Link to={createPageUrl('VendorSuppliers')}>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#E53935]/20 flex items-center justify-center">
-                    <Building2 className="w-6 h-6 text-[#E53935]" />
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-[#E53935]/20 flex items-center justify-center">
+                    <Building2 className="w-5 h-5 md:w-6 md:h-6 text-[#E53935]" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-[#F5F5F5]">Explorar proveedores</h3>
-                    <p className="text-sm text-[#B0B0B0]">Ver todos los proveedores disponibles</p>
+                    <h3 className="font-semibold text-[#F5F5F5] text-sm md:text-base">Explorar proveedores</h3>
+                    <p className="text-xs md:text-sm text-[#B0B0B0]">Ver todos los proveedores disponibles</p>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-[#B0B0B0] group-hover:text-[#E53935] transition-colors" />
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-[#B0B0B0] group-hover:text-[#E53935] transition-colors shrink-0" />
               </div>
             </CardContent>
           </Link>
@@ -157,18 +157,18 @@ export default function VendorDashboard() {
 
         <Card className="bg-[#1E1E1E] border-[#2A2A2A] hover:shadow-lg hover:border-[#E53935]/50 transition-all cursor-pointer group">
           <Link to={createPageUrl('VendorProducts')}>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#E53935]/20 flex items-center justify-center">
-                    <Package className="w-6 h-6 text-[#E53935]" />
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-[#E53935]/20 flex items-center justify-center">
+                    <Package className="w-5 h-5 md:w-6 md:h-6 text-[#E53935]" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-[#F5F5F5]">Explorar productos</h3>
-                    <p className="text-sm text-[#B0B0B0]">Explora todos los productos disponibles</p>
+                    <h3 className="font-semibold text-[#F5F5F5] text-sm md:text-base">Explorar productos</h3>
+                    <p className="text-xs md:text-sm text-[#B0B0B0]">Explora todos los productos disponibles</p>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-[#B0B0B0] group-hover:text-[#E53935] transition-colors" />
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-[#B0B0B0] group-hover:text-[#E53935] transition-colors shrink-0" />
               </div>
             </CardContent>
           </Link>
@@ -176,18 +176,18 @@ export default function VendorDashboard() {
 
         <Card className="bg-[#1E1E1E] border-[#2A2A2A] hover:shadow-lg hover:border-[#E53935]/50 transition-all cursor-pointer group">
           <Link to={createPageUrl('VendorCart')}>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#E53935]/20 flex items-center justify-center">
-                    <ShoppingCart className="w-6 h-6 text-[#E53935]" />
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-[#E53935]/20 flex items-center justify-center">
+                    <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 text-[#E53935]" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-[#F5F5F5]">Ver carrito</h3>
-                    <p className="text-sm text-[#B0B0B0]">{cartItems.length} ítems en el carrito</p>
+                    <h3 className="font-semibold text-[#F5F5F5] text-sm md:text-base">Ver carrito</h3>
+                    <p className="text-xs md:text-sm text-[#B0B0B0]">{cartItems.length} ítems en el carrito</p>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-[#B0B0B0] group-hover:text-[#E53935] transition-colors" />
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-[#B0B0B0] group-hover:text-[#E53935] transition-colors shrink-0" />
               </div>
             </CardContent>
           </Link>
@@ -197,53 +197,53 @@ export default function VendorDashboard() {
       {/* Recent Quotes */}
       <Card className="bg-[#1E1E1E] border-[#2A2A2A]">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-[#F5F5F5]">
-            <FileText className="w-5 h-5 text-[#E53935]" />
+          <CardTitle className="flex items-center gap-2 text-[#F5F5F5] text-sm md:text-base">
+            <FileText className="w-4 h-4 md:w-5 md:h-5 text-[#E53935]" />
             Presupuestos recientes
           </CardTitle>
           <Link to={createPageUrl('Quotes')}>
-            <Button variant="ghost" size="sm" className="text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A]">
-              Ver todos
-              <ArrowRight className="w-4 h-4 ml-2" />
+            <Button variant="ghost" size="sm" className="text-[#B0B0B0] hover:text-[#E53935] hover:bg-[#2A2A2A] text-xs md:text-sm h-8 md:h-9">
+              <span className="hidden sm:inline">Ver todos</span>
+              <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 sm:ml-2" />
             </Button>
           </Link>
         </CardHeader>
         <CardContent>
           {quotes.length === 0 ? (
-            <div className="text-center py-8">
-              <FileText className="w-12 h-12 mx-auto mb-3 text-[#2A2A2A]" />
-              <p className="text-[#B0B0B0]">Todavía no hay presupuestos</p>
+            <div className="text-center py-6 md:py-8">
+              <FileText className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 md:mb-3 text-[#2A2A2A]" />
+              <p className="text-[#B0B0B0] text-sm md:text-base">Todavía no hay presupuestos</p>
               <Link to={createPageUrl('VendorCart')}>
-             <Button className="mt-4 bg-[#E53935] text-white hover:bg-[#C62828]">
+             <Button className="mt-3 md:mt-4 bg-[#E53935] text-white hover:bg-[#C62828] h-9 md:h-10 text-xs md:text-sm">
               Crea tu primer presupuesto
             </Button>
 
               </Link>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {quotes.slice(0, 5).map(quote => (
-                <Link 
+                <Link
                   key={quote.id}
                   to={createPageUrl(`QuoteBuilder?id=${quote.id}`)}
-                  className="flex items-center justify-between p-4 rounded-lg border border-[#2A2A2A] hover:border-[#E53935]/50 transition-colors"
+                  className="flex items-center justify-between p-3 md:p-4 rounded-lg border border-[#2A2A2A] hover:border-[#E53935]/50 transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <p className="font-medium text-[#F5F5F5]">{quote.customer_name}</p>
-                      <p className="text-sm text-[#B0B0B0]">{quote.quote_number}</p>
+                  <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                    <div className="min-w-0">
+                      <p className="font-medium text-[#F5F5F5] text-sm md:text-base truncate">{quote.customer_name}</p>
+                      <p className="text-xs md:text-sm text-[#B0B0B0]">{quote.quote_number}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <Badge className={
+                  <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                    <Badge className={`text-[10px] md:text-xs ${
                       quote.status === 'Accepted' ? 'bg-emerald-900/30 text-emerald-400' :
                       quote.status === 'Sent' ? 'bg-blue-900/30 text-blue-400' :
                       quote.status === 'Rejected' ? 'bg-red-900/30 text-red-400' :
                       'bg-[#2A2A2A] text-[#B0B0B0]'
-                    }>
+                    }`}>
                       {quote.status || 'Draft'}
                     </Badge>
-                    <span className="font-semibold text-emerald-400">
+                    <span className="font-semibold text-emerald-400 text-xs md:text-base">
                       ${(quote.total_profit_amount || 0).toFixed(2)}
                     </span>
                   </div>
