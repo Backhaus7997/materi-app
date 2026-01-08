@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from "@/api/apiClient";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
@@ -72,7 +72,7 @@ const normalizePhone = (phone) => {
 };
 
 export default function QuoteBuilder() {
-  const requestedNextNumber = useRef(false);
+  const requestedNextNumberRef = useRef(false);
   const urlParams = new URLSearchParams(window.location.search);
   const quoteId = urlParams.get('id');
   const navigate = useNavigate();
